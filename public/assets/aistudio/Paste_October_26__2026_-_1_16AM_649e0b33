@@ -1,0 +1,1098 @@
+PROJECT: NADRA PAKISTAN — DAILY OPERATIONAL PROGRESS & STATISTICS DASHBOARD
+
+1. ROLE AND OBJECTIVE
+
+Act as a senior full-stack software architect, UI/UX designer, data visualization expert, database engineer, and OCR/document-processing specialist.
+
+Build a complete, professional, responsive, full-stack web application for monitoring the daily operational progress of NADRA (National Database and Registration Authority), Pakistan.
+
+The application must be based on the structure and reporting categories of the provided reference spreadsheet image, titled approximately:
+
+Zone-D Larkana Daily Progress Report
+
+The reference image is provided only to understand the reporting layout, column headings, metrics, and office-wise structure. Create a modern, premium web dashboard instead of copying the spreadsheet’s visual design.
+
+The application must support:
+
+* Consolidated Zone-level operational statistics.
+* DAU/NRC/office-wise daily performance.
+* Date-wise historical reporting.
+* Employee late-arrival statistics.
+* Q-Matic token progress.
+* OneApp processing and booking progress.
+* Approved OneApp applications.
+* Facial Recognition Certificate statistics.
+* Pak-ID approval statistics.
+* Automated image-to-data extraction.
+* Manual data entry and correction.
+* Historical records, audit logs, reports, and exports.
+
+The final application must be functional, not merely a visual prototype.
+
+2. TECHNOLOGY STACK AND ARCHITECTURE
+
+Create a complete full-stack application using:
+
+Frontend:
+
+* React with TypeScript.
+* Vite.
+* Tailwind CSS.
+* shadcn/ui or an equivalent high-quality component system.
+* Lucide icons.
+* Recharts for charts and graphs.
+* Responsive layouts optimized for mobile, tablet, laptop, and large desktop displays.
+
+Backend:
+
+* Node.js with Express or an equivalent supported backend.
+* TypeScript.
+* PostgreSQL or MySQL for persistent relational storage.
+* Secure server-side authentication and authorization.
+* A dedicated OCR and image-processing service.
+* Validated REST APIs.
+
+Deployment:
+
+* Environment-variable-based configuration.
+* Database migrations and seed data.
+* Production build configuration.
+* Deployment documentation.
+* Secure file storage for uploaded images.
+* Backup and restoration support.
+
+If the available hosting environment requires PHP/MySQL or another specific backend, preserve the complete functionality and adapt the backend architecture accordingly.
+
+Do not build a frontend-only application. All records, user permissions, reporting dates, uploads, calculations, and audit logs must persist in the database.
+
+3. DESIGN SYSTEM AND VISUAL IDENTITY
+
+Create a premium, modern, enterprise-grade government operations dashboard.
+
+Design direction:
+
+* Inspired by professional public-sector data systems.
+* Deep navy blue, official-looking blue, white, and subtle neutral gray.
+* Restrained green for successful processing.
+* Amber for pending items and warnings.
+* Red for errors, exceptions, and unresolved discrepancies.
+* Clean typography, consistent spacing, elegant cards, and subtle shadows.
+* Rounded corners, refined borders, and accessible contrast.
+* Modern charts, progress bars, tables, and status indicators.
+* Professional loading states, empty states, error messages, and success notifications.
+
+Use a configurable NADRA-themed visual identity. Official logos, seals, and government branding must only be used when authorized assets are provided. Do not invent official endorsements or imply that this is an official NADRA-operated system without authorization.
+
+The UI should feel like a professional enterprise reporting platform, not a generic admin template.
+
+4. APPLICATION LAYOUT
+
+A. Main Header
+
+Display:
+
+* Application title: Daily Operational Progress Dashboard.
+* Organization: Zone-D Larkana.
+* Reporting date.
+* Last successful data update.
+* Logged-in user’s name and role.
+* Notifications.
+* User profile and logout.
+* Full-screen dashboard option.
+
+Add a global date selector with:
+
+* Today.
+* Yesterday.
+* Custom date.
+* Date range.
+* Month.
+* Year.
+
+The selected date must control every KPI, chart, table, comparison, and report on the dashboard.
+
+If multiple dates are selected, display clearly labeled period totals, averages, or daily trends as appropriate. Never silently combine multiple days into a single-day report.
+
+B. Sidebar Navigation
+
+Create the following navigation items:
+
+1. Executive Overview.
+2. Office-wise Performance.
+3. Employee Attendance.
+4. Q-Matic Token Progress.
+5. Progress / Booking — OneApp.
+6. Approved OneApp.
+7. Facial Recognition Certificates.
+8. Pak-ID Approval.
+9. Image Upload & OCR Review.
+10. Daily Reports.
+11. Historical Analytics.
+12. Data Quality & Reconciliation.
+13. User Management.
+14. Audit Logs.
+15. Settings.
+
+Allow authorized administrators to configure the zone, DAUs, NRCs, office names, and office codes.
+
+5. EXECUTIVE OVERVIEW — ALL OFFICES
+
+This is the primary landing page.
+
+At the top, display the reporting date and a prominent summary of the selected date’s operational performance across all active DAUs/NRCs/offices in the selected zone.
+
+A. Organization Summary Cards
+
+Display:
+
+* Total active reporting offices.
+* Offices reporting for the selected date.
+* Offices with missing reports.
+* Total Q-Matic tokens issued.
+* Total Q-Matic tokens processed.
+* Total OneApp TIDs issued.
+* Total OneApp TIDs processed.
+* Total OneApp TIDs skipped.
+* Overall OneApp reconciliation percentage.
+* Total approved OneApp applications.
+* Total diminished fingerprints MBVS cases.
+* Total Proof of Life Certificates.
+* Total Pak-ID approved cases.
+* Total Pak-ID deferred cases.
+* Total Pak-ID correction cases.
+
+Display employee attendance cards:
+
+* Total employees reported.
+* Total late arrivals after 07:45 AM.
+* Total late arrivals after 08:00 AM.
+* Employees arriving on time, if the underlying data supports this calculation.
+
+Each KPI card must include:
+
+* A clear metric title.
+* The selected-date value.
+* A relevant icon.
+* A concise contextual label.
+* A comparison with the previous reporting day, where data is available.
+* A click action to open the corresponding detailed report.
+
+Do not fabricate missing values or treat missing reports as zero.
+
+B. Zone-Wide Performance Charts
+
+Create:
+
+* Office-wise OneApp processing percentage.
+* Office-wise Q-Matic processing comparison.
+* Late arrivals by office.
+* Approved OneApp applications by office.
+* Facial Recognition Certificate totals.
+* Pak-ID approval outcome distribution.
+* Daily operational progress trend.
+* Reporting completion status.
+
+Use bar charts, line charts, stacked bars, donut charts, and compact progress indicators where appropriate.
+
+Every chart must respect the selected date or date range.
+
+Provide useful tooltips, readable labels, and legends. Avoid excessive charts that make the dashboard difficult to understand.
+
+C. Zone Summary Table
+
+Display a consolidated table containing one row per DAU/NRC/office and a final TOTAL row.
+
+Columns should include:
+
+* Zone.
+* Office/DAU code.
+* DAU/NRC/office name.
+* Reporting status.
+* Total employees.
+* Late after 07:45 AM.
+* Late after 08:00 AM.
+* Q-Matic issued.
+* Q-Matic processed.
+* Q-Matic processing percentage.
+* OneApp TIDs issued.
+* Processed OneApp.
+* Skipped OneApp TIDs.
+* OneApp reconciliation percentage.
+* Approved OneApp.
+* Diminished fingerprints MBVS.
+* Proof of Life Certificate.
+* Pak-ID approved.
+* Pak-ID deferred/sent for approval.
+* Pak-ID correction.
+
+Provide:
+
+* Search by office name or code.
+* Sorting.
+* Pagination.
+* Column visibility controls.
+* Filters.
+* CSV and Excel export.
+* Print-friendly layout.
+* Clickable office names that open the detailed office dashboard.
+
+The TOTAL row must be calculated from the underlying records, not by adding percentages.
+
+6. OFFICE-WISE / DAU-WISE DASHBOARD
+
+Create a separate, detailed page for each DAU/NRC/office.
+
+Each office page should have its own header containing:
+
+* Office name.
+* Office code.
+* Zone.
+* Selected reporting date.
+* Report submission status.
+* Last update time.
+
+Show the same categories available in the executive dashboard, but restricted to the selected office and date.
+
+Include:
+
+* Daily KPI cards.
+* Employee attendance statistics.
+* Q-Matic processing.
+* OneApp issued, processed, and skipped totals.
+* Approved OneApp.
+* Facial Recognition Certificates.
+* Pak-ID approvals.
+* Daily performance charts.
+* Detailed data tables.
+* Reporting history.
+* Previous-day comparisons.
+
+Provide a dropdown to switch between offices without returning to the main dashboard.
+
+Allow authorized users to enter or correct office-specific records and see updated calculations immediately.
+
+Office totals must contribute exactly once to the consolidated zone totals.
+
+7. EMPLOYEE ATTENDANCE AND LATE-ARRIVAL DASHBOARD
+
+Create a dedicated employee attendance interface.
+
+Display three separate KPI cards:
+
+1. Employees arriving after 07:45 AM.
+2. Employees arriving after 08:00 AM.
+3. Total employees reported.
+
+Provide office-wise attendance statistics in a table and bar chart.
+
+Required columns:
+
+* Office name.
+* Total employees.
+* Employees arriving by 07:45 AM, if available.
+* Employees arriving after 07:45 AM.
+* Employees arriving after 08:00 AM.
+* Attendance data source.
+* Last update.
+
+Important calculation rules:
+
+* Define the reporting thresholds explicitly in the settings.
+* Use a consistent, configurable time zone, defaulting to Asia/Karachi.
+* A timestamp after 07:45:00 AM qualifies for the first threshold.
+* A timestamp after 08:00:00 AM qualifies for the second threshold.
+* Employees arriving after 08:00 AM should normally be included in the after-07:45 AM total as well.
+* Therefore, these two threshold totals overlap and must not be added together to calculate unique late employees.
+* If only aggregate counts are supplied in the image, preserve those reported counts and mark the underlying individual-level arrival times as unavailable.
+* Never calculate individual employee attendance without the necessary underlying data.
+
+If individual attendance data is available, display an employee-level detail table with authorized access only.
+
+8. Q-MATIC TOKEN PROGRESS
+
+Create a dedicated Q-Matic dashboard section.
+
+Primary metrics:
+
+* Q-Matic Issued.
+* Processed on OneApp.
+* Remaining / unprocessed tokens.
+* Q-Matic processing percentage.
+
+Calculation:
+
+Q-Matic processing percentage =
+(Processed on OneApp ÷ Q-Matic Issued) × 100.
+
+Remaining / unprocessed =
+Q-Matic Issued − Processed on OneApp.
+
+Rules:
+
+* If issued is zero and processed is zero, show N/A instead of 100%.
+* If issued is zero and processed is greater than zero, flag a reconciliation error.
+* If processed exceeds issued, flag a discrepancy rather than hiding it.
+* Display percentages to two decimal places.
+* Do not silently convert invalid figures into valid figures.
+
+Provide:
+
+* Office-wise comparisons.
+* Zone-wide totals.
+* Daily trends.
+* Progress bars.
+* Data discrepancy indicators.
+
+9. PROGRESS / BOOKING — ONEAPP
+
+Create a dedicated dashboard section containing three primary cards:
+
+1. OneApp TIDs Issued.
+2. Processed OneApp.
+3. Skipped OneApp TIDs.
+
+Add a large reconciliation percentage indicator and progress bar.
+
+Use the following formula:
+
+OneApp Reconciliation Percentage =
+((Processed OneApp + Skipped OneApp TIDs) ÷ OneApp TIDs Issued) × 100.
+
+Example:
+
+* Issued: 100.
+* Processed: 85.
+* Skipped: 15.
+* Reconciliation: 100%.
+
+Another example:
+
+* Issued: 100.
+* Processed: 80.
+* Skipped: 10.
+* Reconciliation: 90%.
+
+The second example should show 90%, not 100%, because 10 issued TIDs remain unaccounted for.
+
+Important rules:
+
+* Processed and skipped counts must represent mutually exclusive outcomes for the same issued TIDs.
+* If issued is zero and both outcomes are zero, show N/A.
+* If processed plus skipped exceeds issued, flag an inconsistency.
+* Do not cap an invalid percentage at 100% without showing the underlying discrepancy.
+* Use two decimal places.
+* Distinguish the raw reconciliation percentage from any operational target or performance score.
+
+Show:
+
+* Zone-level progress.
+* Office-wise progress.
+* Daily trends.
+* Issued versus processed versus skipped charts.
+* Remaining/unaccounted TIDs.
+* Reconciliation warnings.
+* Date-wise history.
+
+10. APPROVED ONEAPP
+
+Create a separate dashboard for all approved OneApp applications.
+
+Display:
+
+* Total approved OneApp applications.
+* Office-wise approved applications.
+* Daily approvals.
+* Previous-day comparison.
+* Monthly trend.
+* Highest-volume and lowest-volume reporting offices.
+
+Add a table with:
+
+* Reporting date.
+* Office name.
+* Office code.
+* Approved OneApp quantity.
+* Previous-day quantity.
+* Difference.
+* Data verification status.
+
+Approved OneApp must remain a separate reporting metric. Do not assume that all processed TIDs were approved unless the source data explicitly establishes that relationship.
+
+11. FACIAL RECOGNITION CERTIFICATES
+
+Create a dedicated section for the following two categories.
+
+A. Diminished Fingerprints MBVS
+
+Display:
+
+* Daily total.
+* Zone-wide total.
+* Office-wise quantities.
+* Historical trends.
+
+B. Proof of Life Certificate
+
+Display:
+
+* Daily total.
+* Zone-wide total.
+* Office-wise quantities.
+* Historical trends.
+
+Show these as two separate KPI cards and separate columns in the office-wise table.
+
+Do not merge their counts or infer a relationship between them unless explicitly defined in the reporting data.
+
+12. PAK-ID APPROVAL DASHBOARD
+
+Create a separate Pak-ID approval section with three categories:
+
+1. Approved.
+2. Deferred / Sent for Approval.
+3. Correction.
+
+Display:
+
+* Total approved.
+* Total deferred/sent for approval.
+* Total correction.
+* Office-wise statistics.
+* Daily and monthly trends.
+* Status distribution chart.
+
+Provide a detailed table containing:
+
+* Reporting date.
+* Office name.
+* Approved quantity.
+* Deferred/sent-for-approval quantity.
+* Correction quantity.
+* Verification status.
+
+Preserve the original report’s meaning of each column. Do not automatically treat deferred, sent for approval, and correction as interchangeable statuses.
+
+13. DAILY REPORT IMAGE UPLOAD AND AUTOMATIC DATA EXTRACTION
+
+This is one of the application’s most important features.
+
+Create a dedicated page called:
+
+Upload Daily Report — Image to Dashboard
+
+The user must be able to upload a photograph or screenshot of the daily operational report directly from a mobile phone, tablet, or computer.
+
+Support:
+
+* JPG.
+* JPEG.
+* PNG.
+* WebP.
+* PDF, where supported by the processing pipeline.
+* Mobile camera capture, where the browser supports it.
+* Multiple-page or multiple-image reports.
+
+A. Upload Interface
+
+Create a large drag-and-drop upload area with:
+
+* Upload image button.
+* Capture from camera button on supported mobile devices.
+* Image preview.
+* Replace image.
+* Remove image.
+* Upload progress.
+* Processing status.
+* Retry option.
+
+The system must support photographed spreadsheets, tilted images, screen photographs, low-resolution images, and screenshots.
+
+B. Image Preprocessing
+
+Before OCR, perform appropriate preprocessing:
+
+* Detect image orientation.
+* Correct rotation.
+* Crop unnecessary borders.
+* Improve contrast.
+* Reduce glare where feasible.
+* Detect table boundaries.
+* Improve readability.
+* Preserve the original uploaded image for audit purposes.
+
+C. OCR AND STRUCTURED EXTRACTION
+
+Use OCR and, if necessary, a vision-language model to extract the values from the uploaded report.
+
+Extract:
+
+* Report title.
+* Zone.
+* Reporting date.
+* Office/DAU code.
+* Office/DAU name.
+* Employee attendance figures.
+* Q-Matic issued.
+* Q-Matic processed.
+* OneApp TIDs issued.
+* Processed OneApp.
+* Skipped OneApp TIDs.
+* Approved OneApp.
+* Diminished fingerprints MBVS.
+* Proof of Life Certificate.
+* Pak-ID approved.
+* Pak-ID deferred/sent for approval.
+* Pak-ID correction.
+
+Also extract any additional configured columns that appear in the source report.
+
+Use the original report’s column headings and mapping configuration rather than relying on column position alone.
+
+D. OCR FIELD MAPPING
+
+Create an editable mapping interface so the administrator can map extracted spreadsheet headings to database fields.
+
+Support:
+
+* Alternative column names.
+* Abbreviations.
+* Multiline headers.
+* Merged cells.
+* Multiple header rows.
+* Columns containing percentages.
+* Office names split across lines.
+* Report dates embedded in filenames or title rows, with explicit confirmation.
+
+Map each recognized row to the correct office using the office code wherever available.
+
+Use the office code as the primary matching key and the office name as a secondary verification field.
+
+Do not create a new office automatically when an existing office can be matched confidently.
+
+If an office cannot be matched, mark the row as unresolved for administrator review.
+
+E. OCR CONFIDENCE AND MANUAL VERIFICATION
+
+Never silently save uncertain OCR values.
+
+Display a review screen before committing extracted data.
+
+For every extracted cell, show:
+
+* Field name.
+* Extracted value.
+* OCR confidence.
+* Validation status.
+* Any detected warning.
+* Editable input.
+
+Use visual status indicators:
+
+* High confidence: ready for review.
+* Medium confidence: requires attention.
+* Low confidence: must be manually verified.
+
+Confidence thresholds must be configurable and should not be treated as guarantees of correctness.
+
+Allow the user to zoom into the corresponding region of the original image while reviewing a value.
+
+Provide side-by-side image and extracted-data panels.
+
+F. VALIDATION BEFORE IMPORT
+
+Validate:
+
+* Reporting date.
+* Office codes and names.
+* Numeric values.
+* Non-negative counts.
+* Duplicate office rows.
+* Duplicate report uploads.
+* Missing mandatory fields.
+* Percentage calculations.
+* Total-row consistency.
+* Issued versus processed and skipped reconciliation.
+* Whether the report belongs to the selected zone.
+* Whether the image appears to contain the expected report structure.
+
+Never import spreadsheet TOTAL rows as individual office records.
+
+When a source total is available, compare it with the sum of office-level records.
+
+If totals disagree, display the difference and require authorized resolution.
+
+G. PREVIEW AND CONFIRMATION
+
+After OCR, show:
+
+1. Uploaded report preview.
+2. Detected reporting date.
+3. Detected zone.
+4. Number of office rows detected.
+5. Extracted column mapping.
+6. Office-wise extracted data.
+7. Source totals versus calculated totals.
+8. Validation errors.
+9. Low-confidence values.
+10. Duplicate or overwrite warnings.
+
+Add the following actions:
+
+* Save as Draft.
+* Edit Extracted Data.
+* Re-run OCR.
+* Confirm and Import.
+* Cancel Import.
+
+Only import records after the authorized user confirms the data.
+
+After successful import, refresh the relevant dashboard automatically and show an import summary.
+
+H. DUPLICATE AND CORRECTION HANDLING
+
+Use a stable uniqueness rule based on reporting date, office, report type, and the applicable reporting dataset.
+
+If the same report is uploaded again:
+
+* Detect the possible duplicate.
+* Show the existing record.
+* Offer to cancel, compare, or create an authorized correction.
+* Do not double-count the report.
+
+If an existing daily report is corrected:
+
+* Preserve the previous version.
+* Record the user making the correction.
+* Record the timestamp and reason.
+* Recalculate the affected totals.
+* Update the dashboard only after the correction is confirmed.
+
+I. IMPORTANT OCR LIMITATION
+
+OCR must not be presented as perfectly accurate.
+
+If an image is too blurry, partially obscured, or ambiguous, request a clearer image or manual correction.
+
+The system must never invent numbers to fill unreadable cells.
+
+Use a pluggable OCR architecture so a supported local OCR engine or an authorized vision-model provider can be configured.
+
+If a cloud OCR or AI provider is used, clearly document the provider, required API credentials, costs, data-retention implications, and organizational approval requirements. Never expose API keys in frontend code.
+
+14. DAILY REPORTING AND HISTORICAL RECORDS
+
+Create a Daily Reports module with:
+
+* Report date.
+* Zone.
+* Office.
+* Submission status.
+* Uploaded image reference.
+* Import status.
+* Last modification.
+* Submitted by.
+* Verified by.
+
+Provide filters by:
+
+* Date.
+* Date range.
+* Office.
+* Zone.
+* Report status.
+* Import status.
+
+Allow authorized users to open a historical report and view the figures exactly as recorded for that date.
+
+Do not overwrite yesterday’s data when today’s data is uploaded.
+
+Every date must have its own records.
+
+Support monthly and yearly reporting, with daily, monthly, and yearly summaries calculated from stored records.
+
+15. DATA QUALITY AND RECONCILIATION
+
+Create a dedicated data quality panel.
+
+Detect:
+
+* Missing office reports.
+* Duplicate uploads.
+* Duplicate office/date records.
+* Unmatched office codes.
+* Missing mandatory fields.
+* Negative values.
+* Non-numeric values.
+* Invalid percentages.
+* Issued/processed inconsistencies.
+* Differences between source totals and calculated totals.
+* Incomplete OneApp reconciliation.
+* Unexpected changes from the previous day.
+
+For unusually large changes, display a warning for review rather than automatically declaring the data incorrect.
+
+Provide a detailed explanation for each warning.
+
+Allow authorized users to resolve a warning, provide a reason, and retain the resolution history.
+
+16. DATABASE DESIGN
+
+Create a normalized relational database with appropriate indexes and foreign keys.
+
+Recommended tables:
+
+1. users
+2. roles
+3. permissions
+4. user_roles
+5. organizations
+6. zones
+7. offices
+8. reporting_dates or reporting_periods
+9. office_daily_reports
+10. employee_attendance_summaries
+11. qmatic_daily_statistics
+12. oneapp_daily_statistics
+13. approved_oneapp_statistics
+14. facial_recognition_statistics
+15. pakid_approval_statistics
+16. report_uploads
+17. ocr_extraction_jobs
+18. ocr_extracted_rows
+19. ocr_field_mappings
+20. import_batches
+21. data_validation_issues
+22. audit_logs
+23. report_corrections
+24. application_settings
+
+Keep all records associated with the relevant organization, office, reporting date, source upload, and user where applicable.
+
+Use database transactions for imports and corrections so that partial imports cannot corrupt totals.
+
+Store timestamps consistently and display reporting dates in the Asia/Karachi time zone.
+
+Use decimal or integer data types appropriately. Operational counts should normally be non-negative integers; percentages should be derived from counts rather than manually stored as the authoritative value.
+
+Avoid storing the same office metric in multiple tables without a clear reason.
+
+Provide complete SQL migrations or schema files.
+
+17. AUTHENTICATION AND ROLE-BASED ACCESS
+
+Implement secure login and server-side permission checks.
+
+Suggested roles:
+
+* Super Administrator.
+* Zone Administrator.
+* Reporting Administrator.
+* Office Data Entry Operator.
+* Data Verification Officer.
+* Viewer / Read-only User.
+* Auditor.
+
+Permission examples:
+
+* View zone dashboard.
+* View office dashboard.
+* Enter office data.
+* Upload reports.
+* Review OCR.
+* Confirm imports.
+* Correct submitted records.
+* Export reports.
+* Manage offices.
+* Manage users.
+* View audit logs.
+* Manage field mappings.
+
+An office-level user must not automatically gain access to all offices.
+
+A zone administrator may access all offices within the assigned zone.
+
+Enforce permissions on the backend, not just by hiding frontend buttons.
+
+18. AUDIT LOGGING AND DATA SECURITY
+
+Because the application concerns sensitive operational reporting, implement:
+
+* Secure authentication.
+* Password hashing.
+* Session security.
+* CSRF protection where applicable.
+* Rate limiting.
+* Input validation.
+* SQL injection protection.
+* Secure file upload validation.
+* Restricted file access.
+* Role-based authorization.
+* HTTPS deployment guidance.
+* Database backup and recovery.
+* Audit logging.
+* Configurable file-retention policies.
+
+Log:
+
+* Login events.
+* Image uploads.
+* OCR execution.
+* Import confirmation.
+* Data edits.
+* Corrections.
+* Exports.
+* Office configuration changes.
+* Permission changes.
+
+Never include passwords, access tokens, or secrets in logs.
+
+Avoid uploading identity documents or unnecessary personal data. This dashboard should process the operational reporting figures shown in the reference report, not individual CNIC records.
+
+If the report image contains unrelated sensitive information, provide an option to crop or redact it before sending it to an external OCR service.
+
+19. EXPORTS AND PRINTING
+
+Provide:
+
+* Excel export.
+* CSV export.
+* PDF report.
+* Print-friendly report.
+* Office-wise report.
+* Consolidated zone report.
+* Daily summary.
+* Monthly summary.
+* Attendance summary.
+* Q-Matic summary.
+* OneApp reconciliation report.
+* Facial Recognition Certificate report.
+* Pak-ID approval report.
+* Data discrepancy report.
+
+Exports must respect the selected reporting date, filters, and user permissions.
+
+Use the same calculations in the dashboard and exported reports.
+
+Clearly print:
+
+* Reporting date or date range.
+* Zone.
+* Office, where applicable.
+* Generation timestamp.
+* Report title.
+* Relevant totals.
+* Verification status.
+
+20. FORMULAS AND BUSINESS RULES
+
+Implement these rules consistently across the application.
+
+A. Q-Matic processing percentage:
+
+If Q-Matic Issued > 0:
+
+Processed on OneApp / Q-Matic Issued × 100.
+
+If both values are zero, display N/A.
+
+If processed exceeds issued, flag an inconsistency.
+
+B. OneApp reconciliation percentage:
+
+If OneApp TIDs Issued > 0:
+
+(Processed OneApp + Skipped OneApp TIDs) / OneApp TIDs Issued × 100.
+
+If all three values are zero, display N/A.
+
+If processed plus skipped exceeds issued, flag an inconsistency.
+
+C. Remaining OneApp TIDs:
+
+Issued − Processed − Skipped.
+
+If this is positive, display the number of unaccounted TIDs.
+
+If negative, flag a discrepancy.
+
+D. Zone-level percentages:
+
+Calculate percentages using the sum of the relevant counts across reporting offices.
+
+Never calculate the zone-wide percentage by averaging individual office percentages.
+
+E. Office coverage:
+
+Reporting office coverage = Offices with valid confirmed reports / Active offices expected to report × 100.
+
+Display missing reports separately. Never treat missing reports as zero-activity reports.
+
+F. Approved OneApp and Pak-ID totals:
+
+Sum the corresponding approved, deferred, and correction quantities from validated records. Do not infer one status from another.
+
+G. Daily and historical data:
+
+All calculations must use the selected date or date range, with no unintended mixing of reporting periods.
+
+21. USER EXPERIENCE REQUIREMENTS
+
+The interface must be simple enough for a reporting employee to use without technical knowledge.
+
+Provide:
+
+* Clear labels.
+* Helpful tooltips.
+* Searchable office lists.
+* Consistent date selection.
+* Fast page loading.
+* Accessible controls.
+* Mobile-friendly forms.
+* Clear validation messages.
+* Confirmation dialogs before important changes.
+* Success and failure notifications.
+* Empty-state guidance.
+* Loading indicators during OCR and report imports.
+
+Use realistic test data only in a clearly marked DEMO environment.
+
+Do not mix demo figures with real operational records.
+
+22. REQUIRED APPLICATION PAGES
+
+Build the following complete pages:
+
+1. Login.
+2. Executive Overview.
+3. Office-wise Dashboard.
+4. Employee Attendance.
+5. Q-Matic Progress.
+6. OneApp Progress / Booking.
+7. Approved OneApp.
+8. Facial Recognition Certificates.
+9. Pak-ID Approval.
+10. Upload Daily Report.
+11. OCR Review and Field Mapping.
+12. Import Validation and Confirmation.
+13. Daily Reports.
+14. Historical Analytics.
+15. Data Quality.
+16. User Management.
+17. Office Management.
+18. Audit Logs.
+19. Application Settings.
+20. User Profile.
+
+All pages must use consistent design components and functional navigation.
+
+23. IMPLEMENTATION AND TESTING
+
+Develop the application in a complete, testable sequence.
+
+Phase 1:
+
+* Project setup.
+* Database schema.
+* Authentication.
+* Roles and permissions.
+* Office configuration.
+
+Phase 2:
+
+* Manual daily data entry.
+* Executive dashboard.
+* Office-wise dashboard.
+* Attendance, Q-Matic, OneApp, facial recognition, and Pak-ID modules.
+
+Phase 3:
+
+* Image upload.
+* OCR processing.
+* Field mapping.
+* Validation.
+* Import confirmation.
+* Duplicate detection.
+
+Phase 4:
+
+* Historical reports.
+* Charts.
+* Exports.
+* Audit logs.
+* Data quality tools.
+
+Phase 5:
+
+* Automated tests.
+* Security validation.
+* Responsive testing.
+* Deployment documentation.
+
+Write automated tests for:
+
+* Every calculation formula.
+* Date filtering.
+* Office-wise aggregation.
+* Zone-level aggregation.
+* Duplicate upload detection.
+* OCR field mapping.
+* Import rollback.
+* Permission enforcement.
+* Historical corrections.
+* Export consistency.
+
+Test edge cases including zero counts, unreadable cells, missing reports, duplicate offices, processed counts exceeding issued counts, and incomplete reconciliation.
+
+24. ACCEPTANCE CRITERIA
+
+The project is complete only when:
+
+1. A user can sign in securely.
+2. The main dashboard shows consolidated progress for the selected date.
+3. The office-wise dashboard displays individual DAU/NRC progress.
+4. Changing the date refreshes all applicable figures.
+5. Historical reports remain unchanged when new daily reports are uploaded.
+6. Employee late-arrival counts appear in separate threshold cards and office-wise tables.
+7. Q-Matic processing percentages calculate correctly.
+8. OneApp processed and skipped figures reconcile correctly against issued TIDs.
+9. Approved OneApp, facial recognition, and Pak-ID statistics appear in their respective sections.
+10. A user can upload a report image from a mobile phone.
+11. The OCR engine extracts the available values into structured fields.
+12. The user can inspect and correct extracted values before importing.
+13. Duplicate uploads are detected.
+14. Totals are calculated from office-level records and checked against source totals.
+15. Errors and low-confidence fields are clearly identified.
+16. Confirmed data persists in the database.
+17. Charts, tables, and exports use consistent calculations.
+18. Access permissions are enforced server-side.
+19. The application has a usable mobile interface.
+20. The application can be deployed using the provided instructions.
+
+25. FINAL DELIVERABLES
+
+Provide:
+
+* Complete frontend source code.
+* Complete backend source code.
+* Database schema and migrations.
+* Sample seed data clearly marked as demo data.
+* OCR processing implementation and configuration.
+* Environment-variable example file without real secrets.
+* Authentication and permissions implementation.
+* API documentation.
+* Automated tests.
+* Production build configuration.
+* Installation instructions.
+* Deployment instructions.
+* Backup and recovery instructions.
+* Troubleshooting guide.
+
+Do not return only a design, mockup, landing page, or sample dashboard.
+
+Do not leave essential functions as non-working buttons or simulated success messages.
+
+If an external OCR provider or service is required, document its setup and limitations explicitly. Do not claim image recognition is working until the actual processing pipeline has been implemented and tested.
+
+Begin by designing the database and application architecture, then implement the complete application with a polished UI, functional dashboards, image-to-data processing, validation, persistent storage, and secure reporting workflows.
+
+The final result should be a reliable daily operational reporting platform that replaces manual spreadsheet-based dashboard preparation with a structured, verifiable, date-wise digital reporting system.

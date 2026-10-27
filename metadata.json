@@ -1,0 +1,6 @@
+{
+  "name": "NADRA Pakistan Zone-D Larkana — Daily Operational Progress Dashboard",
+  "description": "Enterprise operational reporting and statistics platform for NADRA Zone-D Larkana with automated OCR extraction, office-level reconciliation, Q-Matic and OneApp monitoring, and attendance tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
