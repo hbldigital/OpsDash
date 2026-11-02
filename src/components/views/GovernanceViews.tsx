@@ -21,6 +21,8 @@ import {
   RotateCcw,
   Download,
   AlertCircle,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import { Office, User, AuditLog, AppSettings } from '../../types';
 import { useLocalization } from '../../context/LocalizationContext';
@@ -127,6 +129,8 @@ export interface OfficeManagementViewProps {
   onSelectOffice?: (officeCode: string) => void;
   onSelectOfficeProfile?: (officeCode: string) => void;
   onEditOffice?: (office: Office) => void;
+  onOpenAddOffice?: () => void;
+  onDeleteOffice?: (code: string) => Promise<void>;
 }
 
 export const OfficeManagementView: React.FC<OfficeManagementViewProps> = ({
@@ -134,9 +138,12 @@ export const OfficeManagementView: React.FC<OfficeManagementViewProps> = ({
   onSelectOffice,
   onSelectOfficeProfile,
   onEditOffice,
+  onOpenAddOffice,
+  onDeleteOffice,
 }) => {
   const [search, setSearch] = useState('');
   const [filterDistrict, setFilterDistrict] = useState('ALL');
+  const [deletingCode, setDeletingCode] = useState<string | null>(null);
 
   const filtered = offices.filter((o) => {
     const matchSearch =
@@ -222,13 +229,25 @@ export const OfficeManagementView: React.FC<OfficeManagementViewProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={handleExportCsv}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Export Directory CSV
-        </button>
+        <div className="flex items-center gap-2">
+          {onOpenAddOffice && (
+            <button
+              onClick={onOpenAddOffice}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              + Add Another Office
+            </button>
+          )}
+
+          <button
+            onClick={handleExportCsv}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export Directory CSV
+          </button>
+        </div>
       </div>
 
       <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
@@ -341,6 +360,35 @@ export const OfficeManagementView: React.FC<OfficeManagementViewProps> = ({
                           >
                             Edit
                           </button>
+                        )}
+                        {onDeleteOffice && (
+                          deletingCode === o.code ? (
+                            <div className="flex items-center gap-1 bg-rose-950/90 border border-rose-800 px-2 py-0.5 rounded text-[11px]">
+                              <button
+                                onClick={async () => {
+                                  await onDeleteOffice(o.id || o.code);
+                                  setDeletingCode(null);
+                                }}
+                                className="text-white bg-rose-600 hover:bg-rose-500 px-1.5 py-0.5 rounded font-bold"
+                              >
+                                Confirm
+                              </button>
+                              <button
+                                onClick={() => setDeletingCode(null)}
+                                className="text-slate-400 hover:text-white px-1"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setDeletingCode(o.code)}
+                              className="p-1 text-rose-400 hover:text-rose-300 hover:bg-rose-950/60 rounded border border-rose-800/40"
+                              title="Delete office"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )
                         )}
                       </div>
                     </td>

@@ -13,15 +13,8 @@ import {
   DataQualityIssue,
   AppSettings,
   EmployeeAttendanceRecord,
-  ContactDetail,
-  StaffBreakdown,
+  LeadershipTenureRecord,
 } from '../src/types/dashboard';
-import {
-  calculateQMatic,
-  calculateOneApp,
-  calculateAttendance,
-  aggregateZone,
-} from '../src/utils/calculations';
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DB_FILE = path.resolve(DATA_DIR, 'nadra_operational_db.json');
@@ -93,99 +86,178 @@ const DEFAULT_USERS: UserProfile[] = [
     email: 'dau.larkana@nadra.gov.pk',
     role: 'DATA_ENTRY_OPERATOR',
     zone: 'Zone-D Larkana',
-    assignedOfficeCode: 'LKR-01',
-  },
-  {
-    id: 'u-6',
-    name: 'Inspector Javed Malik',
-    email: 'auditor@nadra.gov.pk',
-    role: 'AUDITOR',
-    zone: 'Zone-D Larkana',
+    assignedOfficeCode: '10501',
   },
 ];
 
 export const INITIAL_OFFICES: Office[] = [
   {
-    code: 'LKR-01',
-    name: 'DAU Larkana City',
-    district: 'Larkana',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'DAU',
-    isActive: true,
-    totalCounters: 8,
-    expectedStaff: 24,
-    dailyCapacity: 450,
-    landline: '074-9410123',
-    address: 'Station Road, Near Sessions Court, Larkana, Sindh',
-    latitude: 27.5589,
-    longitude: 68.2120,
-    incharge: {
-      name: 'Muhammad Aslam Chandio',
-      designation: 'Senior Assistant Director (DAU Incharge)',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0300-1234567', type: 'whatsapp' },
-        { id: 'c2', label: 'Official Call', number: '0333-7654321', type: 'call' },
-        { id: 'c3', label: 'Emergency Contact', number: '0315-9876543', type: 'call' },
-        { id: 'c4', label: 'Direct Desk Line', number: '074-9410124', type: 'landline' },
-      ],
-    },
-    assistant: {
-      name: 'Rashid Ali Solangi',
-      designation: 'Assistant Incharge / Superintendent',
-      contacts: [
-        { id: 'ac1', label: 'WhatsApp & Call', number: '0301-2345678', type: 'both' },
-        { id: 'ac2', label: 'Official Mobile', number: '0345-8765432', type: 'call' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 3,
-      officersFemale: 1,
-      officialsMale: 10,
-      officialsFemale: 4,
-      supportingMale: 3,
-      supportingFemale: 1,
-      outsourceMale: 2,
-      outsourceFemale: 0,
-      totalStaff: 24,
-    },
-  },
-  {
-    code: 'RAT-02',
-    name: 'NRC Ratodero',
+    id: 'dau-10501-m',
+    code: '10501',
+    name: 'NRC Larkana (Morning Shift)',
+    shift: 'Morning',
     district: 'Larkana',
     zone: 'Zone-D Larkana',
     zoneName: 'Larkana',
     zoneCode: 'Z050D',
     type: 'NRC',
     isActive: true,
-    totalCounters: 4,
-    expectedStaff: 12,
-    dailyCapacity: 220,
-    landline: '074-7620311',
-    address: 'Main Bypass Road, Near Bus Terminal, Ratodero, Larkana',
-    latitude: 27.8032,
-    longitude: 68.2882,
+    totalCounters: 8,
+    expectedStaff: 16,
+    dailyCapacity: 350,
+    landline: '074-9410123',
+    address: 'Station Road, Near Sessions Court, Larkana, Sindh',
+    latitude: 27.5589,
+    longitude: 68.2120,
     incharge: {
-      name: 'Ghulam Mustafa Abro',
-      designation: 'Assistant Director / Center Incharge',
+      name: 'Muhammad Aslam Chandio',
+      designation: 'Senior Assistant Director',
+      grade: 'BPS-18',
+      startDate: '2023-08-15',
       contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0302-3456789', type: 'whatsapp' },
-        { id: 'c2', label: 'Official Mobile', number: '0334-8765432', type: 'call' },
-        { id: 'c3', label: 'Residence/Emergency', number: '0312-5432109', type: 'call' },
+        { id: 'c1', label: 'WhatsApp', number: '0300-1234567', type: 'whatsapp' },
+        { id: 'c2', label: 'Official Call', number: '0333-7654321', type: 'call' },
+        { id: 'c3', label: 'Emergency Contact', number: '0315-9876543', type: 'call' },
+        { id: 'c4', label: 'Desk Landline', number: '074-9410124', type: 'landline' },
+      ],
+    },
+    secondIncharge: {
+      name: 'Rashid Ali Solangi',
+      designation: 'Assistant Incharge / Superintendent',
+      grade: 'BPS-16',
+      startDate: '2024-01-10',
+      contacts: [
+        { id: 'sc1', label: 'WhatsApp & Call', number: '0301-2345678', type: 'both' },
+        { id: 'sc2', label: 'Official Mobile', number: '0345-8765432', type: 'call' },
       ],
     },
     assistant: {
-      name: 'Suhail Ahmed Kalhoro',
-      designation: 'Senior Registration Executive',
+      name: 'Naveed Ahmed Kalhoro',
+      designation: 'Office Assistant (OA)',
+      grade: 'BPS-14',
+      responsibilities: 'Public queue token coordination, staff duty roster, daily reconciliation statements, dispatch register and biometric machine maintenance.',
+      mobileNumber: '0302-3456789',
+      whatsappNumber: '0302-3456789',
+      startDate: '2024-02-01',
       contacts: [
-        { id: 'ac1', label: 'WhatsApp & Call', number: '0303-4567890', type: 'both' },
+        { id: 'ac1', label: 'WhatsApp Direct', number: '0302-3456789', type: 'whatsapp' },
+        { id: 'ac2', label: 'Mobile Call', number: '0345-9876543', type: 'call' },
       ],
     },
+    leadershipHistory: [
+      {
+        id: 'ten-10501-1',
+        role: 'OIC',
+        roleTitle: 'Office Incharge (OIC)',
+        name: 'Ghulam Shabir Mangi',
+        designation: 'Deputy Director',
+        grade: 'BPS-18',
+        contact: '0300-9988776',
+        whatsappNumber: '0300-9988776',
+        startDate: '2022-01-10',
+        endDate: '2023-08-14',
+        isCurrent: false,
+        tenureDuration: '1 yr, 7 mos, 4 days (581 days / 83 wks)',
+        transferOrderNo: 'NADRA/RHQ/SUK/HR-4819',
+        remarks: 'Transferred as Zonal Coordinator Sukkur Regional HQ',
+      },
+      {
+        id: 'ten-10501-2',
+        role: 'OA',
+        roleTitle: 'Office Assistant (OA)',
+        name: 'Bashir Ahmed Tunio',
+        designation: 'Senior Assistant',
+        grade: 'BPS-14',
+        contact: '0313-1122334',
+        whatsappNumber: '0313-1122334',
+        startDate: '2022-06-01',
+        endDate: '2024-01-31',
+        isCurrent: false,
+        tenureDuration: '1 yr, 8 mos (609 days / 87 wks)',
+        transferOrderNo: 'NADRA/ZD-LRK/2024/09',
+        remarks: 'Transferred to Executive NRC Larkana on merit',
+      },
+    ],
     staffBreakdown: {
       officersMale: 2,
-      officersFemale: 0,
+      officersFemale: 1,
+      officialsMale: 6,
+      officialsFemale: 3,
+      supportingMale: 2,
+      supportingFemale: 0,
+      outsourceMale: 2,
+      outsourceFemale: 0,
+      totalStaff: 16,
+    },
+  },
+  {
+    id: 'dau-10501-e',
+    code: '10501',
+    name: 'NRC Larkana (Evening Shift)',
+    shift: 'Evening',
+    district: 'Larkana',
+    zone: 'Zone-D Larkana',
+    zoneName: 'Larkana',
+    zoneCode: 'Z050D',
+    type: 'NRC',
+    isActive: true,
+    totalCounters: 6,
+    expectedStaff: 12,
+    dailyCapacity: 300,
+    landline: '074-9410125',
+    address: 'Station Road, Near Sessions Court, Larkana, Sindh',
+    latitude: 27.5589,
+    longitude: 68.2120,
+    incharge: {
+      name: 'Tariq Mehmood Brohi',
+      designation: 'Deputy Assistant Director',
+      grade: 'BPS-17',
+      startDate: '2024-02-15',
+      contacts: [
+        { id: 'c1', label: 'WhatsApp', number: '0300-2345678', type: 'whatsapp' },
+        { id: 'c2', label: 'Official Call', number: '0333-8765432', type: 'call' },
+      ],
+    },
+    secondIncharge: {
+      name: 'Farhan Ali Lashari',
+      designation: 'Registration Officer',
+      grade: 'BPS-16',
+      startDate: '2024-03-01',
+      contacts: [
+        { id: 'sc1', label: 'WhatsApp & Call', number: '0301-3456789', type: 'both' },
+      ],
+    },
+    assistant: {
+      name: 'Shahbaz Ali Soomro',
+      designation: 'Office Assistant (OA)',
+      grade: 'BPS-14',
+      responsibilities: 'Evening shift cash reconciliation, OneApp token monitoring, evening closing registers, vault security handover.',
+      mobileNumber: '0303-4567890',
+      whatsappNumber: '0303-4567890',
+      startDate: '2024-03-01',
+      contacts: [
+        { id: 'ac1', label: 'WhatsApp Direct', number: '0303-4567890', type: 'whatsapp' },
+      ],
+    },
+    leadershipHistory: [
+      {
+        id: 'ten-10501e-1',
+        role: 'OIC',
+        roleTitle: 'Office Incharge (OIC)',
+        name: 'Kamran Haider Shaikh',
+        designation: 'Assistant Director',
+        grade: 'BPS-17',
+        contact: '0302-7766554',
+        startDate: '2023-01-01',
+        endDate: '2024-02-14',
+        isCurrent: false,
+        tenureDuration: '1 yr, 1 mo, 14 days (409 days / 58 wks)',
+        remarks: 'Transferred to RHQ Karachi',
+      },
+    ],
+    staffBreakdown: {
+      officersMale: 1,
+      officersFemale: 1,
       officialsMale: 5,
       officialsFemale: 2,
       supportingMale: 2,
@@ -196,7 +268,159 @@ export const INITIAL_OFFICES: Office[] = [
     },
   },
   {
-    code: 'DOK-03',
+    id: 'dau-52466',
+    code: '52466',
+    name: 'NRC Executive Larkana',
+    district: 'Larkana',
+    zone: 'Zone-D Larkana',
+    zoneName: 'Larkana',
+    zoneCode: 'Z050D',
+    type: 'Executive NRC',
+    isActive: true,
+    totalCounters: 4,
+    expectedStaff: 12,
+    dailyCapacity: 200,
+    landline: '074-9410188',
+    address: 'VIP Road, Civil Lines, Larkana',
+    latitude: 27.5621,
+    longitude: 68.2095,
+    incharge: {
+      name: 'Ghulam Mustafa Abro',
+      designation: 'Assistant Director / Executive Incharge',
+      grade: 'BPS-17',
+      startDate: '2023-11-01',
+      contacts: [
+        { id: 'c1', label: 'WhatsApp', number: '0300-3456789', type: 'whatsapp' },
+        { id: 'c2', label: 'Official Desk', number: '074-9410189', type: 'landline' },
+      ],
+    },
+    secondIncharge: {
+      name: 'Zubair Ahmed Shaikh',
+      designation: 'Senior Registration Executive',
+      grade: 'BPS-16',
+      startDate: '2024-01-15',
+      contacts: [
+        { id: 'sc1', label: 'Call & WhatsApp', number: '0332-1234567', type: 'both' },
+      ],
+    },
+    assistant: {
+      name: 'Bashir Ahmed Tunio',
+      designation: 'Office Assistant (OA)',
+      grade: 'BPS-14',
+      responsibilities: 'Executive VIP applicant assistance, Pak-ID online verification desk, fee receipt audit, biometric card tracking.',
+      mobileNumber: '0313-1122334',
+      whatsappNumber: '0313-1122334',
+      startDate: '2024-02-01',
+      contacts: [
+        { id: 'ac1', label: 'WhatsApp & Call', number: '0313-1122334', type: 'both' },
+      ],
+    },
+    leadershipHistory: [
+      {
+        id: 'ten-52466-1',
+        role: 'OIC',
+        roleTitle: 'Office Incharge (OIC)',
+        name: 'Nadeem Akhtar Bhutto',
+        designation: 'Senior Assistant Director',
+        grade: 'BPS-18',
+        contact: '0300-5544332',
+        startDate: '2022-05-15',
+        endDate: '2023-10-31',
+        isCurrent: false,
+        tenureDuration: '1 yr, 5 mos, 16 days (534 days / 76 wks)',
+        remarks: 'Promoted to Deputy Director Zonal Operations',
+      },
+    ],
+    staffBreakdown: {
+      officersMale: 2,
+      officersFemale: 1,
+      officialsMale: 4,
+      officialsFemale: 3,
+      supportingMale: 1,
+      supportingFemale: 0,
+      outsourceMale: 1,
+      outsourceFemale: 0,
+      totalStaff: 12,
+    },
+  },
+  {
+    id: 'dau-10532',
+    code: '10532',
+    name: 'NRC Ratodero',
+    district: 'Larkana',
+    zone: 'Zone-D Larkana',
+    zoneName: 'Larkana',
+    zoneCode: 'Z050D',
+    type: 'NRC',
+    isActive: true,
+    totalCounters: 4,
+    expectedStaff: 10,
+    dailyCapacity: 200,
+    landline: '074-7120111',
+    address: 'Near Old Bus Stand, Main Ratodero Bazar, Ratodero',
+    latitude: 27.8028,
+    longitude: 68.2888,
+    incharge: {
+      name: 'Imtiaz Ali Soomro',
+      designation: 'Assistant Director / Tehsil Incharge',
+      grade: 'BPS-17',
+      startDate: '2023-09-01',
+      contacts: [
+        { id: 'c1', label: 'WhatsApp', number: '0300-4567890', type: 'whatsapp' },
+        { id: 'c2', label: 'Official Mobile', number: '0345-1234567', type: 'call' },
+      ],
+    },
+    secondIncharge: {
+      name: 'Mazhar Ali Dayo',
+      designation: 'Superintendent',
+      grade: 'BPS-16',
+      startDate: '2024-01-01',
+      contacts: [
+        { id: 'sc1', label: 'Call', number: '0301-4455667', type: 'call' },
+      ],
+    },
+    assistant: {
+      name: 'Ghulam Rasool Mangi',
+      designation: 'Office Assistant (OA)',
+      grade: 'BPS-14',
+      responsibilities: 'Tehsil public attendance logs, counter ticket dispatch, local union council reconciliation, archive storage.',
+      mobileNumber: '0302-5566778',
+      whatsappNumber: '0302-5566778',
+      startDate: '2023-10-15',
+      contacts: [
+        { id: 'ac1', label: 'WhatsApp & Call', number: '0302-5566778', type: 'both' },
+      ],
+    },
+    leadershipHistory: [
+      {
+        id: 'ten-10532-1',
+        role: 'OIC',
+        roleTitle: 'Office Incharge (OIC)',
+        name: 'Abdul Fattah Khuhro',
+        designation: 'Superintendent / Acting Incharge',
+        grade: 'BPS-16',
+        startDate: '2022-08-01',
+        endDate: '2023-08-31',
+        isCurrent: false,
+        tenureDuration: '1 yr, 30 days (395 days / 56 wks)',
+        remarks: 'Completed acting tenure successfully',
+      },
+    ],
+    staffBreakdown: {
+      officersMale: 1,
+      officersFemale: 0,
+      officialsMale: 5,
+      officialsFemale: 2,
+      supportingMale: 1,
+      supportingFemale: 0,
+      outsourceMale: 1,
+      outsourceFemale: 0,
+      totalStaff: 10,
+    },
+  },
+  {
+    id: 'dau-10521',
+    code: '10521',
     name: 'NRC Dokri',
     district: 'Larkana',
     zone: 'Zone-D Larkana',
@@ -206,32 +430,63 @@ export const INITIAL_OFFICES: Office[] = [
     isActive: true,
     totalCounters: 3,
     expectedStaff: 8,
-    dailyCapacity: 160,
-    landline: '074-4080122',
-    address: 'Mohenjo Daro Road, Near Taluka Hospital, Dokri',
+    dailyCapacity: 150,
+    landline: '074-4050222',
+    address: 'Near Taluka Hospital, Mohenjo Daro Road, Dokri',
     latitude: 27.3756,
     longitude: 68.0984,
     incharge: {
-      name: 'Nadir Ali Bhutto',
-      designation: 'Deputy Assistant Director',
+      name: 'Nisar Ahmed Dayo',
+      designation: 'Registration Officer / Incharge',
+      grade: 'BPS-17',
+      startDate: '2024-01-05',
       contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0304-5678901', type: 'whatsapp' },
-        { id: 'c2', label: 'Call Only', number: '0331-2345678', type: 'call' },
+        { id: 'c1', label: 'WhatsApp', number: '0300-5678901', type: 'whatsapp' },
+        { id: 'c2', label: 'Call', number: '0333-6789012', type: 'call' },
+      ],
+    },
+    secondIncharge: {
+      name: 'Mukhtiar Ali Kalhoro',
+      designation: 'Senior Executive',
+      grade: 'BPS-16',
+      startDate: '2024-02-01',
+      contacts: [
+        { id: 'sc1', label: 'Call', number: '0303-8899001', type: 'call' },
       ],
     },
     assistant: {
-      name: 'Imtiaz Hussain Shaikh',
-      designation: 'Registration Officer',
+      name: 'Bilawal Ali Sangi',
+      designation: 'Office Assistant (OA)',
+      grade: 'BPS-11',
+      responsibilities: 'Daily reporting to Larkana Zonal office, queue token coordination, CNIC collection registers.',
+      mobileNumber: '0304-9988776',
+      whatsappNumber: '0304-9988776',
+      startDate: '2024-02-10',
       contacts: [
-        { id: 'ac1', label: 'WhatsApp & Call', number: '0305-6789012', type: 'both' },
+        { id: 'ac1', label: 'WhatsApp & Call', number: '0304-9988776', type: 'both' },
       ],
     },
+    leadershipHistory: [
+      {
+        id: 'ten-10521-1',
+        role: 'OIC',
+        roleTitle: 'Office Incharge (OIC)',
+        name: 'Suhail Ahmed Memon',
+        designation: 'Registration Officer',
+        grade: 'BPS-16',
+        startDate: '2022-11-01',
+        endDate: '2024-01-04',
+        isCurrent: false,
+        tenureDuration: '1 yr, 2 mos, 3 days (429 days / 61 wks)',
+        remarks: 'Transferred to NRC Naudero',
+      },
+    ],
     staffBreakdown: {
       officersMale: 1,
       officersFemale: 0,
-      officialsMale: 3,
+      officialsMale: 4,
       officialsFemale: 1,
-      supportingMale: 2,
+      supportingMale: 1,
       supportingFemale: 0,
       outsourceMale: 1,
       outsourceFemale: 0,
@@ -239,8 +494,9 @@ export const INITIAL_OFFICES: Office[] = [
     },
   },
   {
-    code: 'BAK-04',
-    name: 'NRC Bakrani',
+    id: 'dau-50415',
+    code: '50415',
+    name: 'NRC Naudero',
     district: 'Larkana',
     zone: 'Zone-D Larkana',
     zoneName: 'Larkana',
@@ -249,197 +505,57 @@ export const INITIAL_OFFICES: Office[] = [
     isActive: true,
     totalCounters: 3,
     expectedStaff: 8,
-    dailyCapacity: 150,
-    landline: '074-4210344',
-    address: 'Main Bazar, Opposite Degree College, Bakrani',
-    latitude: 27.4221,
-    longitude: 68.2341,
+    dailyCapacity: 160,
+    landline: '074-4040333',
+    address: 'Near Municipal Committee Office, Main Road, Naudero',
+    latitude: 27.6583,
+    longitude: 68.3583,
     incharge: {
-      name: 'Zahid Hussain Mangi',
-      designation: 'Incharge Officer',
+      name: 'Farooq Ahmed Jalbani',
+      designation: 'Assistant Incharge / Registration Officer',
+      grade: 'BPS-16',
+      startDate: '2024-01-10',
       contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0306-7890123', type: 'whatsapp' },
-        { id: 'c2', label: 'Official Call', number: '0346-7890123', type: 'call' },
+        { id: 'c1', label: 'WhatsApp', number: '0300-6789012', type: 'whatsapp' },
+        { id: 'c2', label: 'Official Call', number: '0312-3456789', type: 'call' },
       ],
     },
-    assistant: {
-      name: 'Abdul Fattah Sangi',
-      designation: 'Assistant Incharge',
-      contacts: [
-        { id: 'ac1', label: 'Call', number: '0307-8901234', type: 'call' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 1,
-      officersFemale: 0,
-      officialsMale: 4,
-      officialsFemale: 1,
-      supportingMale: 1,
-      supportingFemale: 0,
-      outsourceMale: 1,
-      outsourceFemale: 0,
-      totalStaff: 8,
-    },
-  },
-  {
-    code: 'MIR-05',
-    name: 'NRC Mirokhan',
-    district: 'Qambar-Shahdadkot',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 3,
-    expectedStaff: 7,
-    dailyCapacity: 140,
-    landline: '074-4110567',
-    address: 'Near National Bank, Main Road, Mirokhan',
-    latitude: 27.7611,
-    longitude: 68.0934,
-    incharge: {
-      name: 'Bashir Ahmed Tunio',
-      designation: 'Assistant Director',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp & Call', number: '0308-9012345', type: 'both' },
-      ],
-    },
-    assistant: {
-      name: 'Qurban Ali Chandio',
-      designation: 'Supervisor',
-      contacts: [
-        { id: 'ac1', label: 'Mobile', number: '0309-0123456', type: 'call' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 1,
-      officersFemale: 0,
-      officialsMale: 3,
-      officialsFemale: 1,
-      supportingMale: 1,
-      supportingFemale: 0,
-      outsourceMale: 1,
-      outsourceFemale: 0,
-      totalStaff: 7,
-    },
-  },
-  {
-    code: 'QAM-06',
-    name: 'DAU Qambar',
-    district: 'Qambar-Shahdadkot',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'DAU',
-    isActive: true,
-    totalCounters: 6,
-    expectedStaff: 16,
-    dailyCapacity: 320,
-    landline: '074-4211890',
-    address: 'Near Deputy Commissioner Office, Qambar',
-    latitude: 27.5894,
-    longitude: 67.9989,
-    incharge: {
-      name: 'Mumtaz Ali Brohi',
-      designation: 'Senior Assistant Director',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0300-3456781', type: 'whatsapp' },
-        { id: 'c2', label: 'Official Phone', number: '0333-1122334', type: 'call' },
-        { id: 'c3', label: 'Direct Desk Line', number: '074-4211891', type: 'landline' },
-      ],
-    },
-    assistant: {
-      name: 'Farhan Ali Lashari',
-      designation: 'Assistant Director Operations',
-      contacts: [
-        { id: 'ac1', label: 'WhatsApp & Call', number: '0301-4455667', type: 'both' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 2,
-      officersFemale: 1,
-      officialsMale: 7,
-      officialsFemale: 2,
-      supportingMale: 2,
-      supportingFemale: 0,
-      outsourceMale: 2,
-      outsourceFemale: 0,
-      totalStaff: 16,
-    },
-  },
-  {
-    code: 'SHK-07',
-    name: 'NRC Shahdadkot',
-    district: 'Qambar-Shahdadkot',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 5,
-    expectedStaff: 14,
-    dailyCapacity: 260,
-    landline: '074-4012345',
-    address: 'Kotoo Motoo Chowk, Silawat Mohalla, Shahdadkot',
-    latitude: 27.8472,
-    longitude: 67.9067,
-    incharge: {
-      name: 'Kamran Ali Magsi',
-      designation: 'Center Incharge / AD',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0300-8899001', type: 'whatsapp' },
-        { id: 'c2', label: 'Call', number: '0345-1234567', type: 'call' },
-      ],
-    },
-    assistant: {
-      name: 'Noor Muhammad Bhatti',
+    secondIncharge: {
+      name: 'Riaz Hussain Shah',
       designation: 'Senior Registration Executive',
+      grade: 'BPS-16',
+      startDate: '2024-02-15',
       contacts: [
-        { id: 'ac1', label: 'WhatsApp & Call', number: '0302-7788990', type: 'both' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 2,
-      officersFemale: 0,
-      officialsMale: 6,
-      officialsFemale: 2,
-      supportingMale: 2,
-      supportingFemale: 1,
-      outsourceMale: 1,
-      outsourceFemale: 0,
-      totalStaff: 14,
-    },
-  },
-  {
-    code: 'NAS-08',
-    name: 'NRC Nasirabad',
-    district: 'Qambar-Shahdadkot',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 3,
-    expectedStaff: 8,
-    dailyCapacity: 150,
-    landline: '074-4389012',
-    address: 'Near Tehsil Headquarters, Nasirabad',
-    latitude: 27.3821,
-    longitude: 67.9234,
-    incharge: {
-      name: 'Nawaz Ali Bughio',
-      designation: 'Assistant Incharge',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp & Call', number: '0303-1122334', type: 'both' },
+        { id: 'sc1', label: 'WhatsApp & Call', number: '0306-1122334', type: 'both' },
       ],
     },
     assistant: {
-      name: 'Mansoor Ahmed Soomro',
-      designation: 'DEO Supervisor',
+      name: 'Abdul Qadir Hakro',
+      designation: 'Office Assistant (OA)',
+      grade: 'BPS-14',
+      responsibilities: 'Daily token reporting, staff biometric sign-in register, OneApp reconciliation records.',
+      mobileNumber: '0305-2233445',
+      whatsappNumber: '0305-2233445',
+      startDate: '2024-01-15',
       contacts: [
-        { id: 'ac1', label: 'Mobile', number: '0333-2233445', type: 'call' },
+        { id: 'ac1', label: 'WhatsApp Direct', number: '0305-2233445', type: 'whatsapp' },
       ],
     },
+    leadershipHistory: [
+      {
+        id: 'ten-50415-1',
+        role: 'OIC',
+        roleTitle: 'Office Incharge (OIC)',
+        name: 'Zameer Hussain Jatoi',
+        designation: 'Assistant Director',
+        grade: 'BPS-17',
+        startDate: '2023-01-15',
+        endDate: '2024-01-09',
+        isCurrent: false,
+        tenureDuration: '11 mos, 25 days (359 days / 51 wks)',
+        remarks: 'Transferred on official rotation',
+      },
+    ],
     staffBreakdown: {
       officersMale: 1,
       officersFemale: 0,
@@ -453,9 +569,10 @@ export const INITIAL_OFFICES: Office[] = [
     },
   },
   {
-    code: 'WAR-09',
-    name: 'NRC Warah',
-    district: 'Qambar-Shahdadkot',
+    id: 'dau-51210',
+    code: '51210',
+    name: 'NRC Baqrani',
+    district: 'Larkana',
     zone: 'Zone-D Larkana',
     zoneName: 'Larkana',
     zoneCode: 'Z050D',
@@ -463,683 +580,423 @@ export const INITIAL_OFFICES: Office[] = [
     isActive: true,
     totalCounters: 3,
     expectedStaff: 8,
-    dailyCapacity: 150,
-    landline: '074-4412389',
-    address: 'Station Road, Near Post Office, Warah',
-    latitude: 27.4478,
-    longitude: 67.7956,
+    dailyCapacity: 140,
+    landline: '074-4060444',
+    address: 'Near Rural Health Center, Baqrani, Larkana',
+    latitude: 27.4333,
+    longitude: 68.1833,
     incharge: {
-      name: 'Saeed Ahmed Channa',
-      designation: 'Assistant Director / Incharge',
+      name: 'Liaquat Ali Bughio',
+      designation: 'Registration Officer / Incharge',
+      grade: 'BPS-16',
+      startDate: '2023-12-01',
       contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0304-2233445', type: 'whatsapp' },
-        { id: 'c2', label: 'Official Line', number: '0313-3344556', type: 'call' },
+        { id: 'c1', label: 'WhatsApp & Call', number: '0300-7890123', type: 'both' },
       ],
     },
-    assistant: {
-      name: 'Junaid Ahmed Jamali',
-      designation: 'Registration Officer',
+    secondIncharge: {
+      name: 'Fayaz Ahmed Solangi',
+      designation: 'Executive Officer',
+      grade: 'BPS-16',
+      startDate: '2024-02-01',
       contacts: [
-        { id: 'ac1', label: 'Call & WhatsApp', number: '0345-6677889', type: 'both' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 1,
-      officersFemale: 0,
-      officialsMale: 3,
-      officialsFemale: 1,
-      supportingMale: 2,
-      supportingFemale: 0,
-      outsourceMale: 1,
-      outsourceFemale: 0,
-      totalStaff: 8,
-    },
-  },
-  {
-    code: 'KAK-10',
-    name: 'NRC Kamber Ali Khan',
-    district: 'Qambar-Shahdadkot',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 4,
-    expectedStaff: 10,
-    dailyCapacity: 190,
-    landline: '074-4290145',
-    address: 'Old Judicial Complex, Kamber Ali Khan',
-    latitude: 27.5921,
-    longitude: 68.0012,
-    incharge: {
-      name: 'Hafeezullah Junejo',
-      designation: 'Incharge Officer',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0305-3344556', type: 'whatsapp' },
-        { id: 'c2', label: 'Call', number: '0332-4455667', type: 'call' },
-      ],
-    },
-    assistant: {
-      name: 'Waseem Akram Gopang',
-      designation: 'Assistant Supervisor',
-      contacts: [
-        { id: 'ac1', label: 'WhatsApp & Call', number: '0306-4455667', type: 'both' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 1,
-      officersFemale: 0,
-      officialsMale: 5,
-      officialsFemale: 1,
-      supportingMale: 2,
-      supportingFemale: 0,
-      outsourceMale: 1,
-      outsourceFemale: 0,
-      totalStaff: 10,
-    },
-  },
-  {
-    code: 'JAC-11',
-    name: 'DAU Jacobabad',
-    district: 'Jacobabad',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'DAU',
-    isActive: true,
-    totalCounters: 6,
-    expectedStaff: 18,
-    dailyCapacity: 360,
-    landline: '0722-651234',
-    address: 'DC Office Complex, Shikarpur Road, Jacobabad',
-    latitude: 28.2810,
-    longitude: 68.4376,
-    incharge: {
-      name: 'Sikandar Ali Jakhrani',
-      designation: 'Senior Assistant Director (DAU Incharge)',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0300-5566778', type: 'whatsapp' },
-        { id: 'c2', label: 'Official Mobile', number: '0333-6677889', type: 'call' },
-        { id: 'c3', label: 'Landline Direct', number: '0722-651235', type: 'landline' },
-      ],
-    },
-    assistant: {
-      name: 'Mazhar Ali Pechuho',
-      designation: 'Assistant Incharge',
-      contacts: [
-        { id: 'ac1', label: 'WhatsApp & Call', number: '0301-6677889', type: 'both' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 2,
-      officersFemale: 1,
-      officialsMale: 8,
-      officialsFemale: 3,
-      supportingMale: 2,
-      supportingFemale: 0,
-      outsourceMale: 2,
-      outsourceFemale: 0,
-      totalStaff: 18,
-    },
-  },
-  {
-    code: 'THU-12',
-    name: 'NRC Thul',
-    district: 'Jacobabad',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 4,
-    expectedStaff: 10,
-    dailyCapacity: 180,
-    landline: '0722-680456',
-    address: 'Main Kandhkot Road, Near Eidgah, Thul',
-    latitude: 28.2412,
-    longitude: 68.7754,
-    incharge: {
-      name: 'Mohsin Raza Soomro',
-      designation: 'Assistant Director',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp & Call', number: '0302-8899112', type: 'both' },
-      ],
-    },
-    assistant: {
-      name: 'Ayaz Ali Buriro',
-      designation: 'Senior DEO',
-      contacts: [
-        { id: 'ac1', label: 'Mobile', number: '0334-9900112', type: 'call' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 1,
-      officersFemale: 0,
-      officialsMale: 5,
-      officialsFemale: 1,
-      supportingMale: 2,
-      supportingFemale: 0,
-      outsourceMale: 1,
-      outsourceFemale: 0,
-      totalStaff: 10,
-    },
-  },
-  {
-    code: 'GKH-13',
-    name: 'NRC Garhi Khairo',
-    district: 'Jacobabad',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 3,
-    expectedStaff: 7,
-    dailyCapacity: 130,
-    landline: '0722-690123',
-    address: 'Opposite Taluka Municipal Administration, Garhi Khairo',
-    latitude: 28.0589,
-    longitude: 68.0412,
-    incharge: {
-      name: 'Faisal Mehmood Brohi',
-      designation: 'Center Incharge',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0303-9900223', type: 'whatsapp' },
-        { id: 'c2', label: 'Call', number: '0345-0011223', type: 'call' },
-      ],
-    },
-    assistant: {
-      name: 'Ali Dino Jamali',
-      designation: 'Registration Assistant',
-      contacts: [
-        { id: 'ac1', label: 'Mobile', number: '0315-1122334', type: 'call' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 1,
-      officersFemale: 0,
-      officialsMale: 3,
-      officialsFemale: 1,
-      supportingMale: 1,
-      supportingFemale: 0,
-      outsourceMale: 1,
-      outsourceFemale: 0,
-      totalStaff: 7,
-    },
-  },
-  {
-    code: 'SHI-14',
-    name: 'DAU Shikarpur',
-    district: 'Shikarpur',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'DAU',
-    isActive: true,
-    totalCounters: 6,
-    expectedStaff: 18,
-    dailyCapacity: 350,
-    landline: '0726-512890',
-    address: 'Station Road, Near Shahi Bagh, Shikarpur',
-    latitude: 27.9570,
-    longitude: 68.6378,
-    incharge: {
-      name: 'Zulfiqar Ali Soomro',
-      designation: 'Senior Assistant Director',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0300-7788991', type: 'whatsapp' },
-        { id: 'c2', label: 'Official Call', number: '0333-8899002', type: 'call' },
-        { id: 'c3', label: 'Office Landline', number: '0726-512891', type: 'landline' },
-      ],
-    },
-    assistant: {
-      name: 'Nadeem Ahmed Shaikh',
-      designation: 'Assistant Incharge',
-      contacts: [
-        { id: 'ac1', label: 'WhatsApp & Call', number: '0301-8899003', type: 'both' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 2,
-      officersFemale: 1,
-      officialsMale: 8,
-      officialsFemale: 3,
-      supportingMale: 2,
-      supportingFemale: 0,
-      outsourceMale: 2,
-      outsourceFemale: 0,
-      totalStaff: 18,
-    },
-  },
-  {
-    code: 'KHA-15',
-    name: 'NRC Khanpur',
-    district: 'Shikarpur',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 3,
-    expectedStaff: 7,
-    dailyCapacity: 130,
-    landline: '0726-540112',
-    address: 'Indus Highway, Near Degree College, Khanpur',
-    latitude: 28.0245,
-    longitude: 68.7123,
-    incharge: {
-      name: 'Aftab Ahmed Mahar',
-      designation: 'Center Incharge',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp & Call', number: '0304-0011224', type: 'both' },
-      ],
-    },
-    assistant: {
-      name: 'Zameer Hussain Abro',
-      designation: 'Registration Officer',
-      contacts: [
-        { id: 'ac1', label: 'Call', number: '0332-1122335', type: 'call' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 1,
-      officersFemale: 0,
-      officialsMale: 3,
-      officialsFemale: 1,
-      supportingMale: 1,
-      supportingFemale: 0,
-      outsourceMale: 1,
-      outsourceFemale: 0,
-      totalStaff: 7,
-    },
-  },
-  {
-    code: 'GYA-16',
-    name: 'NRC Garhi Yasin',
-    district: 'Shikarpur',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 3,
-    expectedStaff: 8,
-    dailyCapacity: 150,
-    landline: '0726-580223',
-    address: 'Near Old Police Station, Garhi Yasin',
-    latitude: 27.9089,
-    longitude: 68.5120,
-    incharge: {
-      name: 'Shakeel Ahmed Soomro',
-      designation: 'Assistant Incharge',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0305-1122336', type: 'whatsapp' },
-        { id: 'c2', label: 'Call', number: '0346-2233447', type: 'call' },
+        { id: 'sc1', label: 'Call', number: '0307-8901234', type: 'call' },
       ],
     },
     assistant: {
       name: 'Mansoor Ali Brohi',
-      designation: 'Supervisor',
+      designation: 'Office Assistant (OA)',
+      grade: 'BPS-11',
+      responsibilities: 'Front desk reception, token issuing, daily closing register and verification stamps custody.',
+      mobileNumber: '0306-3344556',
+      whatsappNumber: '0306-3344556',
+      startDate: '2024-01-01',
       contacts: [
-        { id: 'ac1', label: 'Mobile', number: '0306-2233448', type: 'call' },
+        { id: 'ac1', label: 'WhatsApp & Call', number: '0306-3344556', type: 'both' },
       ],
     },
-    staffBreakdown: {
-      officersMale: 1,
-      officersFemale: 0,
-      officialsMale: 4,
-      officialsFemale: 1,
-      supportingMale: 1,
-      supportingFemale: 0,
-      outsourceMale: 1,
-      outsourceFemale: 0,
-      totalStaff: 8,
-    },
-  },
-  {
-    code: 'LGS-17',
-    name: 'NRC Lakhi Ghulam Shah',
-    district: 'Shikarpur',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 3,
-    expectedStaff: 7,
-    dailyCapacity: 130,
-    landline: '0726-590334',
-    address: 'Main Sukkur-Shikarpur Highway, Lakhi Ghulam Shah',
-    latitude: 27.8543,
-    longitude: 68.6987,
-    incharge: {
-      name: 'Rashid Ali Memon',
-      designation: 'Incharge Officer',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp & Call', number: '0307-3344559', type: 'both' },
-      ],
-    },
-    assistant: {
-      name: 'Javed Iqbal Pathan',
-      designation: 'Assistant Incharge',
-      contacts: [
-        { id: 'ac1', label: 'Call', number: '0334-4455660', type: 'call' },
-      ],
-    },
+    leadershipHistory: [],
     staffBreakdown: {
       officersMale: 1,
       officersFemale: 0,
       officialsMale: 3,
       officialsFemale: 1,
-      supportingMale: 1,
-      supportingFemale: 0,
-      outsourceMale: 1,
-      outsourceFemale: 0,
-      totalStaff: 7,
-    },
-  },
-  {
-    code: 'KAS-18',
-    name: 'DAU Kashmore',
-    district: 'Kashmore',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'DAU',
-    isActive: true,
-    totalCounters: 5,
-    expectedStaff: 14,
-    dailyCapacity: 280,
-    landline: '0722-570112',
-    address: 'Indus Highway, Near DPO Complex, Kashmore City',
-    latitude: 28.4321,
-    longitude: 69.5843,
-    incharge: {
-      name: 'Habibullah Mazari',
-      designation: 'Senior Assistant Director',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0300-9911223', type: 'whatsapp' },
-        { id: 'c2', label: 'Official Call', number: '0333-0011224', type: 'call' },
-        { id: 'c3', label: 'Emergency', number: '0312-3344556', type: 'call' },
-      ],
-    },
-    assistant: {
-      name: 'Naveed Ahmed Malik',
-      designation: 'Assistant Incharge',
-      contacts: [
-        { id: 'ac1', label: 'WhatsApp & Call', number: '0301-1122335', type: 'both' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 2,
-      officersFemale: 0,
-      officialsMale: 6,
-      officialsFemale: 2,
       supportingMale: 2,
-      supportingFemale: 0,
-      outsourceMale: 2,
-      outsourceFemale: 0,
-      totalStaff: 14,
-    },
-  },
-  {
-    code: 'KAN-19',
-    name: 'NRC Kandhkot',
-    district: 'Kashmore',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 5,
-    expectedStaff: 15,
-    dailyCapacity: 290,
-    landline: '0722-572345',
-    address: 'Near Old Session Court, Kandhkot',
-    latitude: 28.2432,
-    longitude: 69.1823,
-    incharge: {
-      name: 'Ghulam Qadir Bijarani',
-      designation: 'Assistant Director / Incharge',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp', number: '0302-2233446', type: 'whatsapp' },
-        { id: 'c2', label: 'Call', number: '0345-3344557', type: 'call' },
-      ],
-    },
-    assistant: {
-      name: 'Suhail Ahmed Chachar',
-      designation: 'Registration Supervisor',
-      contacts: [
-        { id: 'ac1', label: 'WhatsApp & Call', number: '0303-3344558', type: 'both' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 2,
-      officersFemale: 1,
-      officialsMale: 6,
-      officialsFemale: 2,
-      supportingMale: 2,
-      supportingFemale: 0,
-      outsourceMale: 2,
-      outsourceFemale: 0,
-      totalStaff: 15,
-    },
-  },
-  {
-    code: 'TAN-20',
-    name: 'NRC Tangwani',
-    district: 'Kashmore',
-    zone: 'Zone-D Larkana',
-    zoneName: 'Larkana',
-    zoneCode: 'Z050D',
-    type: 'NRC',
-    isActive: true,
-    totalCounters: 3,
-    expectedStaff: 8,
-    dailyCapacity: 150,
-    landline: '0722-581901',
-    address: 'Near Rural Health Center, Tangwani',
-    latitude: 28.2912,
-    longitude: 68.9912,
-    incharge: {
-      name: 'Imran Ali Jakhrani',
-      designation: 'Incharge Officer',
-      contacts: [
-        { id: 'c1', label: 'WhatsApp & Call', number: '0304-4455669', type: 'both' },
-      ],
-    },
-    assistant: {
-      name: 'Aijaz Ahmed Brohi',
-      designation: 'Assistant Incharge',
-      contacts: [
-        { id: 'ac1', label: 'Mobile', number: '0331-5566770', type: 'call' },
-      ],
-    },
-    staffBreakdown: {
-      officersMale: 1,
-      officersFemale: 0,
-      officialsMale: 4,
-      officialsFemale: 1,
-      supportingMale: 1,
       supportingFemale: 0,
       outsourceMale: 1,
       outsourceFemale: 0,
       totalStaff: 8,
     },
   },
+  {
+    id: 'dau-51485',
+    code: '51485',
+    name: 'MRV-43',
+    district: 'Larkana',
+    zone: 'Zone-D Larkana',
+    zoneName: 'Larkana',
+    zoneCode: 'Z050D',
+    type: 'MRV',
+    isActive: true,
+    totalCounters: 2,
+    expectedStaff: 5,
+    dailyCapacity: 120,
+    landline: '074-9410199',
+    address: 'Mobile Registration Van Station, Larkana Zone Fleet',
+    latitude: 27.5600,
+    longitude: 68.2100,
+    incharge: {
+      name: 'Saeed Ahmed Channa',
+      designation: 'Field Mobile Officer (MRV Incharge)',
+      grade: 'BPS-16',
+      startDate: '2023-06-01',
+      contacts: [
+        { id: 'c1', label: 'WhatsApp', number: '0304-2233445', type: 'whatsapp' },
+        { id: 'c2', label: 'Official Mobile', number: '0313-3344556', type: 'call' },
+      ],
+    },
+    secondIncharge: {
+      name: 'Khadim Hussain Magsi',
+      designation: 'Technical Driver & Field Operator',
+      grade: 'BPS-11',
+      startDate: '2023-07-01',
+      contacts: [
+        { id: 'sc1', label: 'Call & WhatsApp', number: '0345-6677889', type: 'both' },
+      ],
+    },
+    assistant: {
+      name: 'Naseer Ahmed Junejo',
+      designation: 'Field Assistant (MRV)',
+      grade: 'BPS-11',
+      responsibilities: 'Van generator operation, mobile satellite link monitoring, field token queue and remote village registration logs.',
+      mobileNumber: '0307-4455667',
+      whatsappNumber: '0307-4455667',
+      startDate: '2023-08-01',
+      contacts: [
+        { id: 'ac1', label: 'WhatsApp & Call', number: '0307-4455667', type: 'both' },
+      ],
+    },
+    leadershipHistory: [],
+    staffBreakdown: {
+      officersMale: 1,
+      officersFemale: 0,
+      officialsMale: 2,
+      officialsFemale: 1,
+      supportingMale: 1,
+      supportingFemale: 0,
+      outsourceMale: 1,
+      outsourceFemale: 0,
+      totalStaff: 5,
+    },
+  },
+  {
+    id: 'dau-52061',
+    code: '52061',
+    name: 'UC Akil',
+    district: 'Larkana',
+    zone: 'Zone-D Larkana',
+    zoneName: 'Larkana',
+    zoneCode: 'Z050D',
+    type: 'NRC Counter',
+    isActive: true,
+    totalCounters: 1,
+    expectedStaff: 3,
+    dailyCapacity: 80,
+    landline: '074-9201010',
+    address: 'Union Council Office Building, Akil, Taluka Larkana',
+    latitude: 27.5120,
+    longitude: 68.2710,
+    incharge: {
+      name: 'Zahid Hussain Abro',
+      designation: 'Counter Supervisor / DEO',
+      grade: 'BPS-14',
+      startDate: '2024-01-01',
+      contacts: [
+        { id: 'c1', label: 'WhatsApp & Call', number: '0301-8899002', type: 'both' },
+      ],
+    },
+    assistant: {
+      name: 'Tanveer Ahmed Khuhro',
+      designation: 'Counter Assistant (OA)',
+      grade: 'BPS-11',
+      responsibilities: 'UC citizen token register, OneApp biometric verification assistance, daily progress entry.',
+      mobileNumber: '0308-5566778',
+      whatsappNumber: '0308-5566778',
+      startDate: '2024-01-01',
+      contacts: [
+        { id: 'ac1', label: 'WhatsApp & Call', number: '0308-5566778', type: 'both' },
+      ],
+    },
+    leadershipHistory: [],
+    staffBreakdown: {
+      officersMale: 0,
+      officersFemale: 0,
+      officialsMale: 2,
+      officialsFemale: 0,
+      supportingMale: 1,
+      supportingFemale: 0,
+      outsourceMale: 0,
+      outsourceFemale: 0,
+      totalStaff: 3,
+    },
+  },
+  {
+    id: 'dau-52059',
+    code: '52059',
+    name: 'UC TC Badeh',
+    district: 'Larkana',
+    zone: 'Zone-D Larkana',
+    zoneName: 'Larkana',
+    zoneCode: 'Z050D',
+    type: 'NRC Counter',
+    isActive: true,
+    totalCounters: 2,
+    expectedStaff: 4,
+    dailyCapacity: 100,
+    landline: '074-9201011',
+    address: 'Town Committee Office, Main Badeh Bazar, Taluka Dokri',
+    latitude: 27.3410,
+    longitude: 68.0430,
+    incharge: {
+      name: 'Mumtaz Ali Sangi',
+      designation: 'Counter Incharge',
+      grade: 'BPS-14',
+      startDate: '2024-01-15',
+      contacts: [
+        { id: 'c1', label: 'WhatsApp', number: '0302-9900112', type: 'whatsapp' },
+      ],
+    },
+    assistant: {
+      name: 'Hafeezullah Junejo',
+      designation: 'Counter Assistant (OA)',
+      grade: 'BPS-11',
+      responsibilities: 'TC Badeh queue guidance, citizen biometric scanning, register maintenance.',
+      mobileNumber: '0309-6677889',
+      whatsappNumber: '0309-6677889',
+      startDate: '2024-01-15',
+      contacts: [
+        { id: 'ac1', label: 'WhatsApp & Call', number: '0309-6677889', type: 'both' },
+      ],
+    },
+    leadershipHistory: [],
+    staffBreakdown: {
+      officersMale: 0,
+      officersFemale: 0,
+      officialsMale: 2,
+      officialsFemale: 1,
+      supportingMale: 1,
+      supportingFemale: 0,
+      outsourceMale: 0,
+      outsourceFemale: 0,
+      totalStaff: 4,
+    },
+  },
+  {
+    id: 'dau-52060',
+    code: '52060',
+    name: 'UC MC Ratodero',
+    district: 'Larkana',
+    zone: 'Zone-D Larkana',
+    zoneName: 'Larkana',
+    zoneCode: 'Z050D',
+    type: 'NRC Counter',
+    isActive: true,
+    totalCounters: 2,
+    expectedStaff: 4,
+    dailyCapacity: 100,
+    landline: '074-9201012',
+    address: 'Municipal Committee Office, City Center, Ratodero',
+    latitude: 27.8040,
+    longitude: 68.2910,
+    incharge: {
+      name: 'Sikandar Ali Mirani',
+      designation: 'Senior DEO / Incharge',
+      grade: 'BPS-14',
+      startDate: '2024-01-20',
+      contacts: [
+        { id: 'c1', label: 'WhatsApp & Call', number: '0303-1122445', type: 'both' },
+      ],
+    },
+    assistant: {
+      name: 'Abdul Nabi Kalhoro',
+      designation: 'Counter Assistant (OA)',
+      grade: 'BPS-11',
+      responsibilities: 'MC counter daily reconciliation, token tally, citizen guidance.',
+      mobileNumber: '0310-7788990',
+      whatsappNumber: '0310-7788990',
+      startDate: '2024-01-20',
+      contacts: [
+        { id: 'ac1', label: 'WhatsApp & Call', number: '0310-7788990', type: 'both' },
+      ],
+    },
+    leadershipHistory: [],
+    staffBreakdown: {
+      officersMale: 0,
+      officersFemale: 0,
+      officialsMale: 2,
+      officialsFemale: 1,
+      supportingMale: 1,
+      supportingFemale: 0,
+      outsourceMale: 0,
+      outsourceFemale: 0,
+      totalStaff: 4,
+    },
+  },
+  {
+    id: 'dau-52062',
+    code: '52062',
+    name: 'UC Dhamrah',
+    district: 'Larkana',
+    zone: 'Zone-D Larkana',
+    zoneName: 'Larkana',
+    zoneCode: 'Z050D',
+    type: 'NRC Counter',
+    isActive: true,
+    totalCounters: 1,
+    expectedStaff: 3,
+    dailyCapacity: 80,
+    landline: '074-9201013',
+    address: 'Union Council Office Building, Dhamrah, Taluka Larkana',
+    latitude: 27.5920,
+    longitude: 68.1450,
+    incharge: {
+      name: 'Waseem Akram Brohi',
+      designation: 'Counter Incharge',
+      grade: 'BPS-14',
+      startDate: '2024-02-01',
+      contacts: [
+        { id: 'c1', label: 'WhatsApp & Call', number: '0305-1122338', type: 'both' },
+      ],
+    },
+    assistant: {
+      name: 'Kashif Ali Soomro',
+      designation: 'Counter Assistant (OA)',
+      grade: 'BPS-11',
+      responsibilities: 'Daily token logs, receipt slips and evening data upload verification.',
+      mobileNumber: '0311-8899001',
+      whatsappNumber: '0311-8899001',
+      startDate: '2024-02-01',
+      contacts: [
+        { id: 'ac1', label: 'WhatsApp Direct', number: '0311-8899001', type: 'whatsapp' },
+      ],
+    },
+    leadershipHistory: [],
+    staffBreakdown: {
+      officersMale: 0,
+      officersFemale: 0,
+      officialsMale: 2,
+      officialsFemale: 0,
+      supportingMale: 1,
+      supportingFemale: 0,
+      outsourceMale: 0,
+      outsourceFemale: 0,
+      totalStaff: 3,
+    },
+  },
+  {
+    id: 'dau-52063',
+    code: '52063',
+    name: 'UC Bero Chandio',
+    district: 'Larkana',
+    zone: 'Zone-D Larkana',
+    zoneName: 'Larkana',
+    zoneCode: 'Z050D',
+    type: 'NRC Counter',
+    isActive: true,
+    totalCounters: 1,
+    expectedStaff: 3,
+    dailyCapacity: 80,
+    landline: '074-9201014',
+    address: 'Union Council Office, Bero Chandio, Larkana',
+    latitude: 27.4890,
+    longitude: 68.0550,
+    incharge: {
+      name: 'Noman Ali Kalhoro',
+      designation: 'Counter Supervisor',
+      grade: 'BPS-14',
+      startDate: '2024-02-01',
+      contacts: [
+        { id: 'c1', label: 'WhatsApp & Call', number: '0306-2233449', type: 'both' },
+      ],
+    },
+    assistant: {
+      name: 'Shahid Hussain Abbasi',
+      designation: 'DEO & Assistant (OA)',
+      grade: 'BPS-11',
+      responsibilities: 'UC Bero Chandio counter operations and attendance register.',
+      mobileNumber: '0346-3344550',
+      whatsappNumber: '0346-3344550',
+      startDate: '2024-02-01',
+      contacts: [
+        { id: 'ac1', label: 'Call & WhatsApp', number: '0346-3344550', type: 'both' },
+      ],
+    },
+    leadershipHistory: [],
+    staffBreakdown: {
+      officersMale: 0,
+      officersFemale: 0,
+      officialsMale: 2,
+      officialsFemale: 0,
+      supportingMale: 1,
+      supportingFemale: 0,
+      outsourceMale: 0,
+      outsourceFemale: 0,
+      totalStaff: 3,
+    },
+  },
+  {
+    id: 'dau-52064',
+    code: '52064',
+    name: 'UC Garhi Khuda Bux',
+    district: 'Larkana',
+    zone: 'Zone-D Larkana',
+    zoneName: 'Larkana',
+    zoneCode: 'Z050D',
+    type: 'NRC Counter',
+    isActive: true,
+    totalCounters: 2,
+    expectedStaff: 4,
+    dailyCapacity: 100,
+    landline: '074-9201015',
+    address: 'Union Council Office, Near Mazar Complex, Garhi Khuda Bux, Larkana',
+    latitude: 27.6830,
+    longitude: 68.3750,
+    incharge: {
+      name: 'Aftab Ahmed Tunio',
+      designation: 'Counter Incharge',
+      grade: 'BPS-14',
+      startDate: '2024-01-10',
+      contacts: [
+        { id: 'c1', label: 'WhatsApp', number: '0307-3344560', type: 'whatsapp' },
+        { id: 'c2', label: 'Call', number: '0334-4455671', type: 'call' },
+      ],
+    },
+    assistant: {
+      name: 'Bakhtawar Jan Solangi',
+      designation: 'Female DEO & Assistant (OA)',
+      grade: 'BPS-12',
+      responsibilities: 'Female citizen biometric assistance, token management, daily report submission.',
+      mobileNumber: '0308-5566782',
+      whatsappNumber: '0308-5566782',
+      startDate: '2024-01-10',
+      contacts: [
+        { id: 'ac1', label: 'Call & WhatsApp', number: '0308-5566782', type: 'both' },
+      ],
+    },
+    leadershipHistory: [],
+    staffBreakdown: {
+      officersMale: 0,
+      officersFemale: 0,
+      officialsMale: 2,
+      officialsFemale: 1,
+      supportingMale: 1,
+      supportingFemale: 0,
+      outsourceMale: 0,
+      outsourceFemale: 0,
+      totalStaff: 4,
+    },
+  },
 ];
-
-function generateSeedReports(dateStr: string, varianceMultiplier: number = 1.0): OfficeDailyReport[] {
-  return INITIAL_OFFICES.map((office, idx) => {
-    const baseStaff = office.expectedStaff || 10;
-    const staffReported = Math.max(1, Math.round(baseStaff * (0.9 + (idx % 3) * 0.05)));
-    const late745 = Math.round(staffReported * (idx % 4 === 0 ? 0.25 : 0.1));
-    const late800 = Math.round(late745 * 0.4);
-    const onTime = staffReported - late745;
-
-    const issuedMultiplier = (office.totalCounters * 45) * varianceMultiplier;
-    const qmaticIssued = Math.round(issuedMultiplier * (0.85 + (idx % 5) * 0.04));
-    const qmaticProcessed = Math.round(qmaticIssued * (0.92 + (idx % 3) * 0.02));
-    const qmaticCalc = calculateQMatic(qmaticIssued, qmaticProcessed);
-
-    const oneappIssued = qmaticProcessed;
-    const oneappProcessed = Math.round(oneappIssued * (idx === 8 ? 0.88 : 0.94));
-    const oneappSkipped = Math.round(oneappIssued * 0.05);
-    const oneappCalc = calculateOneApp(oneappIssued, oneappProcessed, oneappSkipped);
-
-    const approvedOneApp = Math.round(oneappProcessed * 0.96);
-    const prevDayApprovedOneApp = Math.round(approvedOneApp * (0.95 + (idx % 3) * 0.04));
-    const approvedDifference = approvedOneApp - prevDayApprovedOneApp;
-
-    const diminishedFingerprintsMBVS = Math.round(approvedOneApp * 0.04) + 1;
-    const proofOfLifeCertificates = Math.round(approvedOneApp * 0.025) + 1;
-
-    const pakidApproved = Math.round(approvedOneApp * 0.12) + 2;
-    const pakidDeferred = Math.round(pakidApproved * 0.1);
-    const pakidCorrection = Math.round(pakidApproved * 0.05);
-
-    const discrepancies: string[] = [];
-    if (idx === 8) {
-      discrepancies.push('Unreconciled OneApp TIDs: 6 tokens unaccounted for after business close.');
-    }
-
-    return {
-      id: `rep-${dateStr}-${office.code}`,
-      date: dateStr,
-      zone: 'Zone-D Larkana',
-      officeCode: office.code,
-      officeName: office.name,
-      reportingStatus: idx === 8 ? 'REPORTED' : 'REPORTED',
-      submissionTime: '08:15:00',
-      submittedBy: 'System Automation',
-      verifiedBy: 'Muhammad Tariq Khan',
-      totalEmployees: staffReported,
-      lateAfter745: late745,
-      lateAfter800: late800,
-      onTimeEmployees: onTime,
-      qmaticIssued,
-      qmaticProcessed,
-      qmaticRemaining: qmaticCalc.remaining,
-      qmaticPercentage: qmaticCalc.percentage,
-      oneappIssued,
-      oneappProcessed,
-      oneappSkipped,
-      oneappRemaining: oneappCalc.remaining,
-      oneappReconciliationPercentage: oneappCalc.percentage,
-      approvedOneApp,
-      prevDayApprovedOneApp,
-      approvedDifference,
-      diminishedFingerprintsMBVS,
-      proofOfLifeCertificates,
-      pakidApproved,
-      pakidDeferred,
-      pakidCorrection,
-      sourceUploadId: 'init-seed',
-      ocrConfidence: 0.98,
-      hasDiscrepancy: discrepancies.length > 0,
-      discrepancies,
-    };
-  });
-}
-
-function generateSeedAttendanceRecords(): EmployeeAttendanceRecord[] {
-  const dates = ['2026-10-25', '2026-10-24'];
-  const records: EmployeeAttendanceRecord[] = [];
-
-  const sampleStaffByOffice: Record<string, Array<{ name: string; desig: string; cat: any; gender: any }>> = {
-    'LKR-01': [
-      { name: 'Muhammad Aslam Chandio', desig: 'Senior Assistant Director', cat: 'OFFICER', gender: 'MALE' },
-      { name: 'Rashid Ali Solangi', desig: 'Assistant Incharge', cat: 'OFFICER', gender: 'MALE' },
-      { name: 'Shazia Bano Abro', desig: 'Assistant Director Verification', cat: 'OFFICER', gender: 'FEMALE' },
-      { name: 'Tariq Mehmood Brohi', desig: 'Senior Registration Executive', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Kainat Fatima Soomro', desig: 'Registration Executive', cat: 'OFFICIAL', gender: 'FEMALE' },
-      { name: 'Bilal Hussain Brohi', desig: 'Data Entry Operator', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Noman Ali Kalhoro', desig: 'Data Entry Operator', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Farzana Parveen Sangi', desig: 'Registration Executive', cat: 'OFFICIAL', gender: 'FEMALE' },
-      { name: 'Sajid Ali Kalhoro', desig: 'Naib Qasid', cat: 'SUPPORTING', gender: 'MALE' },
-      { name: 'Shakeel Ahmed Abro', desig: 'Security Guard', cat: 'OUTSOURCE', gender: 'MALE' },
-      { name: 'Zahid Hussain Bhatti', desig: 'Biometric Operator', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Murtaza Ali Jamali', desig: 'Data Entry Operator', cat: 'OFFICIAL', gender: 'MALE' },
-    ],
-    'RAT-02': [
-      { name: 'Ghulam Mustafa Abro', desig: 'Assistant Director / Incharge', cat: 'OFFICER', gender: 'MALE' },
-      { name: 'Suhail Ahmed Kalhoro', desig: 'Senior Registration Executive', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Bakhtawar Jan Solangi', desig: 'Registration Executive', cat: 'OFFICIAL', gender: 'FEMALE' },
-      { name: 'Altaf Hussain Tunio', desig: 'Data Entry Operator', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Rehana Kausar Brohi', desig: 'Data Entry Operator', cat: 'OFFICIAL', gender: 'FEMALE' },
-      { name: 'Ghulam Shabbir Siyal', desig: 'Supporting Staff', cat: 'SUPPORTING', gender: 'MALE' },
-    ],
-    'DOK-03': [
-      { name: 'Nadir Ali Bhutto', desig: 'Deputy Assistant Director', cat: 'OFFICER', gender: 'MALE' },
-      { name: 'Imtiaz Hussain Shaikh', desig: 'Registration Officer', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Safia Sultana Chandio', desig: 'Data Entry Operator', cat: 'OFFICIAL', gender: 'FEMALE' },
-      { name: 'Munawar Ali Mangi', desig: 'Data Entry Operator', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Ali Bux Kalhoro', desig: 'Office Boy', cat: 'SUPPORTING', gender: 'MALE' },
-    ],
-    'WAR-09': [
-      { name: 'Saeed Ahmed Channa', desig: 'Assistant Director / Incharge', cat: 'OFFICER', gender: 'MALE' },
-      { name: 'Junaid Ahmed Jamali', desig: 'Registration Officer', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Razia Begum Soomro', desig: 'DEO Female Counter', cat: 'OFFICIAL', gender: 'FEMALE' },
-      { name: 'Zulfiqar Ali Lashari', desig: 'Biometric Operator', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Khadim Hussain Magsi', desig: 'Supporting Guard', cat: 'OUTSOURCE', gender: 'MALE' },
-    ],
-    'QAM-06': [
-      { name: 'Mumtaz Ali Brohi', desig: 'Senior Assistant Director', cat: 'OFFICER', gender: 'MALE' },
-      { name: 'Farhan Ali Lashari', desig: 'Assistant Director Operations', cat: 'OFFICER', gender: 'MALE' },
-      { name: 'Tahira Parveen Tunio', desig: 'Senior Registration Executive', cat: 'OFFICIAL', gender: 'FEMALE' },
-      { name: 'Ahsan Ali Mangi', desig: 'Data Entry Operator', cat: 'OFFICIAL', gender: 'MALE' },
-      { name: 'Mohammad Din Kalhoro', desig: 'Supporting Assistant', cat: 'SUPPORTING', gender: 'MALE' },
-    ],
-  };
-
-  dates.forEach((d) => {
-    Object.entries(sampleStaffByOffice).forEach(([officeCode, staffList]) => {
-      const office = INITIAL_OFFICES.find(o => o.code === officeCode);
-      const officeName = office ? office.name : officeCode;
-
-      staffList.forEach((st, idx) => {
-        let checkInTime = '07:35';
-        let status: 'ON_TIME' | 'LATE_745' | 'LATE_800' | 'ABSENT' | 'LEAVE' = 'ON_TIME';
-
-        if (idx === 3) {
-          checkInTime = '07:51';
-          status = 'LATE_745';
-        } else if (idx === 6) {
-          checkInTime = '08:09';
-          status = 'LATE_800';
-        } else if (idx === 7 && d === '2026-10-25') {
-          checkInTime = '08:14';
-          status = 'LATE_800';
-        } else if (idx === 5) {
-          checkInTime = '07:44';
-          status = 'ON_TIME';
-        } else {
-          const minutes = 25 + (idx * 3);
-          checkInTime = `07:${minutes < 10 ? '0' + minutes : minutes}`;
-          status = 'ON_TIME';
-        }
-
-        records.push({
-          id: `att-${d}-${officeCode}-${idx + 1}`,
-          date: d,
-          officeCode,
-          officeName,
-          employeeId: `EMP-${officeCode}-${100 + idx}`,
-          employeeName: st.name,
-          designation: st.desig,
-          category: st.cat,
-          gender: st.gender,
-          checkInTime,
-          status,
-          notes: status === 'LATE_800' ? 'Flagged past 08:00 AM' : status === 'LATE_745' ? 'Arrived after 07:45 AM threshold' : 'Punctual arrival',
-          source: 'BIOMETRIC_OCR',
-        });
-      });
-    });
-  });
-
-  return records;
-}
 
 class DatabaseService {
   private state: DatabaseState;
@@ -1156,148 +1013,59 @@ class DatabaseService {
   }
 
   private loadState(): DatabaseState {
-    let loadedState: Partial<DatabaseState> | null = null;
+    let loadedState: DatabaseState | null = null;
     if (fs.existsSync(DB_FILE)) {
       try {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         loadedState = JSON.parse(raw);
       } catch (err) {
-        console.error('Failed to read db file, initializing seed defaults:', err);
+        console.error('Failed to parse database file, reinitializing fresh:', err);
       }
     }
 
-    const today = '2026-10-25';
-    const yesterday = '2026-10-24';
-    const twoDaysAgo = '2026-10-23';
+    if (loadedState && Array.isArray(loadedState.offices) && loadedState.offices.length > 0) {
+      // Check if offices have old placeholder codes like "LKR-M01"
+      const hasOldCodes = loadedState.offices.some(o => o.code.startsWith('LKR-') || o.code.startsWith('UC-'));
+      const activeOffices = hasOldCodes ? [...INITIAL_OFFICES] : loadedState.offices;
 
-    const seedReports = [
-      ...generateSeedReports(today, 1.0),
-      ...generateSeedReports(yesterday, 0.95),
-      ...generateSeedReports(twoDaysAgo, 0.92),
-    ];
-
-    const seedIssues: DataQualityIssue[] = [
-      {
-        id: 'issue-1',
-        date: today,
-        officeCode: 'WAR-09',
-        officeName: 'NRC Warah',
-        issueType: 'ONEAPP_UNRECONCILED',
-        severity: 'WARNING',
-        description: 'NRC Warah has 6 unaccounted OneApp TIDs requiring operator verification.',
-        suggestedAction: 'Request DAU In-charge to verify offline tokens or system skip logs.',
-        isResolved: false,
-      },
-      {
-        id: 'issue-2',
-        date: yesterday,
-        officeCode: 'GKH-13',
-        officeName: 'NRC Garhi Khairo',
-        issueType: 'ATTENDANCE_ANOMALY',
-        severity: 'NOTICE',
-        description: 'Biometric late arrival rate was 35% on Saturday morning due to power trip.',
-        suggestedAction: 'Confirmed with local admin; generator fuel log matched.',
-        isResolved: true,
-        resolvedBy: 'Muhammad Tariq Khan',
-        resolvedAt: '2026-10-24T18:00:00Z',
-        resolutionNote: 'Approved by Director Operations Larkana.',
-      },
-    ];
-
-    const seedLogs: AuditLogEntry[] = [
-      {
-        id: 'log-1',
-        timestamp: '2026-10-25T08:00:15Z',
-        userId: 'u-1',
-        userName: 'Muhammad Tariq Khan',
-        userRole: 'ZONE_ADMIN',
-        action: 'LOGIN',
-        details: 'User authenticated into Zone-D Larkana Operations Center.',
-      },
-      {
-        id: 'log-2',
-        timestamp: '2026-10-25T11:45:30Z',
-        userId: 'u-3',
-        userName: 'Shagufta Parveen',
-        userRole: 'REPORTING_ADMIN',
-        action: 'EXECUTE_OCR',
-        details: 'Processed daily progress report image for Zone-D Larkana.',
-        reportingDate: today,
-      },
-      {
-        id: 'log-3',
-        timestamp: '2026-10-25T12:00:00Z',
-        userId: 'u-4',
-        userName: 'Fahad Ahmed Soomro',
-        userRole: 'VERIFICATION_OFFICER',
-        action: 'CONFIRM_IMPORT',
-        details: 'Verified and committed 20 office reports into central database for 2026-10-25.',
-        reportingDate: today,
-      },
-    ];
-
-    const seedAttendance = generateSeedAttendanceRecords();
-
-    // If we loaded existing state, upgrade it with new fields if missing
-    if (loadedState) {
-      // Merge offices so rich contact/staff info is present
-      const mergedOffices = INITIAL_OFFICES.map(initOffice => {
-        const found = (loadedState!.offices || []).find(o => o.code.toUpperCase() === initOffice.code.toUpperCase());
-        if (!found) return initOffice;
-        return {
-          ...initOffice,
-          ...found,
-          zoneCode: found.zoneCode || initOffice.zoneCode || 'Z050D',
-          zoneName: found.zoneName || initOffice.zoneName || 'Larkana',
-          incharge: found.incharge || initOffice.incharge,
-          assistant: found.assistant || initOffice.assistant,
-          staffBreakdown: found.staffBreakdown || initOffice.staffBreakdown,
-          landline: found.landline || initOffice.landline,
-          address: found.address || initOffice.address,
-          latitude: found.latitude || initOffice.latitude,
-          longitude: found.longitude || initOffice.longitude,
-        };
-      });
-
-      const mergedAttendance = (loadedState.attendanceRecords && loadedState.attendanceRecords.length > 0)
-        ? loadedState.attendanceRecords
-        : seedAttendance;
-
-      const mergedSettings = {
-        ...DEFAULT_SETTINGS,
-        ...(loadedState.settings || {}),
-        zoneCode: loadedState.settings?.zoneCode || 'Z050D',
-        zoneName: loadedState.settings?.zoneName || 'Larkana',
-        thresholdTime1: loadedState.settings?.thresholdTime1 || '07:45',
-        thresholdTime2: loadedState.settings?.thresholdTime2 || '08:00',
-        customTexts: {
-          ...DEFAULT_SETTINGS.customTexts,
-          ...(loadedState.settings?.customTexts || {}),
-        },
-      };
-
-      const finalState: DatabaseState = {
+      const state: DatabaseState = {
         users: loadedState.users && loadedState.users.length ? loadedState.users : DEFAULT_USERS,
-        offices: mergedOffices,
-        dailyReports: loadedState.dailyReports && loadedState.dailyReports.length ? loadedState.dailyReports : seedReports,
-        dataQualityIssues: loadedState.dataQualityIssues || seedIssues,
-        auditLogs: loadedState.auditLogs || seedLogs,
-        settings: mergedSettings,
-        attendanceRecords: mergedAttendance,
+        offices: activeOffices,
+        dailyReports: loadedState.dailyReports || [],
+        dataQualityIssues: loadedState.dataQualityIssues || [],
+        auditLogs: loadedState.auditLogs || [],
+        settings: {
+          ...DEFAULT_SETTINGS,
+          ...(loadedState.settings || {}),
+        },
+        attendanceRecords: loadedState.attendanceRecords || [],
       };
 
-      this.saveStateToDisk(finalState);
-      return finalState;
+      if (hasOldCodes) {
+        this.saveStateToDisk(state);
+      }
+      return state;
     }
 
+    // Fresh initialization: No dummy reports, no dummy attendance
     const initialState: DatabaseState = {
       users: DEFAULT_USERS,
-      offices: INITIAL_OFFICES,
-      dailyReports: seedReports,
-      dataQualityIssues: seedIssues,
-      auditLogs: seedLogs,
+      offices: [...INITIAL_OFFICES],
+      dailyReports: [],
+      dataQualityIssues: [],
+      auditLogs: [
+        {
+          id: `log-init-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          userId: 'u-1',
+          userName: 'System Initialization',
+          userRole: 'SUPER_ADMIN',
+          action: 'CONFIG_CHANGE',
+          details: 'Initialized NADRA Zone-D Larkana database with official centers and DAU codes (10501, 52466, 10532, 10521, 50415, 51210, 51485, 52061, 52059, 52060). Ready for live operational entries.',
+        },
+      ],
       settings: DEFAULT_SETTINGS,
-      attendanceRecords: seedAttendance,
+      attendanceRecords: [],
     };
 
     this.saveStateToDisk(initialState);
@@ -1352,17 +1120,60 @@ class DatabaseService {
     return this.state.offices;
   }
 
+  public getOfficeById(id: string): Office | undefined {
+    return this.state.offices.find(o => o.id === id);
+  }
+
   public getOfficeByCode(code: string): Office | undefined {
     return this.state.offices.find(o => o.code.toUpperCase() === code.toUpperCase());
   }
 
-  public saveOffice(office: Office, actor: { id: string; name: string; role: any }): Office {
-    const idx = this.state.offices.findIndex(o => o.code.toUpperCase() === office.code.toUpperCase());
-    
-    // Calculate total staff from breakdown if provided
-    let updatedOffice = { ...office };
-    if (updatedOffice.staffBreakdown) {
-      const sb = updatedOffice.staffBreakdown;
+  public getOfficeByIdentifier(identifier: string): Office | undefined {
+    if (!identifier) return undefined;
+    return this.state.offices.find(
+      o => (o.id && o.id.toLowerCase() === identifier.toLowerCase()) ||
+           o.code.toUpperCase() === identifier.toUpperCase()
+    );
+  }
+
+  public saveOffice(
+    office: Office,
+    actor: { id: string; name: string; role: any },
+    previousIdentifier?: string
+  ): Office {
+    let idx = -1;
+
+    // 1. Match by unique ID if present
+    if (office.id) {
+      idx = this.state.offices.findIndex(o => o.id === office.id);
+    }
+    // 2. Match by previous identifier
+    if (idx < 0 && previousIdentifier) {
+      idx = this.state.offices.findIndex(
+        o => (o.id && o.id === previousIdentifier) || o.code.toUpperCase() === previousIdentifier.toUpperCase()
+      );
+    }
+    // 3. Match by shift + code (for Larkana morning/evening)
+    if (idx < 0 && office.shift) {
+      idx = this.state.offices.findIndex(
+        o => o.code.toUpperCase() === office.code.toUpperCase() && o.shift === office.shift
+      );
+    }
+    // 4. Match by code
+    if (idx < 0) {
+      idx = this.state.offices.findIndex(o => o.code.toUpperCase() === office.code.toUpperCase());
+    }
+
+    const oldOffice = idx >= 0 ? this.state.offices[idx] : null;
+    const oldCode = oldOffice ? oldOffice.code : null;
+    const oldName = oldOffice ? oldOffice.name : null;
+
+    if (!office.id) {
+      office.id = oldOffice?.id || `off-${office.code.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString().slice(-4)}`;
+    }
+
+    if (office.staffBreakdown) {
+      const sb = office.staffBreakdown;
       sb.totalStaff = (
         (Number(sb.officersMale) || 0) +
         (Number(sb.officersFemale) || 0) +
@@ -1373,13 +1184,67 @@ class DatabaseService {
         (Number(sb.outsourceMale) || 0) +
         (Number(sb.outsourceFemale) || 0)
       );
-      updatedOffice.expectedStaff = sb.totalStaff;
+      office.expectedStaff = sb.totalStaff;
     }
 
+    const mergedOffice: Office = {
+      ...(oldOffice || {}),
+      ...office,
+      zoneName: office.zoneName || 'Larkana',
+      zoneCode: office.zoneCode || 'Z050D',
+      leadershipHistory: office.leadershipHistory || oldOffice?.leadershipHistory || [],
+    };
+
     if (idx >= 0) {
-      this.state.offices[idx] = { ...this.state.offices[idx], ...updatedOffice };
+      this.state.offices[idx] = mergedOffice;
     } else {
-      this.state.offices.push(updatedOffice);
+      this.state.offices.push(mergedOffice);
+    }
+
+    // CASCADE: If the code changed, cascade across daily reports, attendance records, issues, and user profiles
+    if (oldCode && oldCode.toUpperCase() !== office.code.toUpperCase()) {
+      // 1. Daily reports
+      this.state.dailyReports.forEach(r => {
+        if (r.officeCode.toUpperCase() === oldCode.toUpperCase()) {
+          r.officeCode = office.code;
+          r.officeName = office.name;
+        }
+      });
+
+      // 2. Attendance records
+      this.state.attendanceRecords.forEach(a => {
+        if (a.officeCode.toUpperCase() === oldCode.toUpperCase()) {
+          a.officeCode = office.code;
+          a.officeName = office.name;
+        }
+      });
+
+      // 3. Data quality issues
+      this.state.dataQualityIssues.forEach(dq => {
+        if (dq.officeCode.toUpperCase() === oldCode.toUpperCase()) {
+          dq.officeCode = office.code;
+          dq.officeName = office.name;
+        }
+      });
+
+      // 4. Assigned user profiles
+      this.state.users.forEach(u => {
+        if (u.assignedOfficeCode && u.assignedOfficeCode.toUpperCase() === oldCode.toUpperCase()) {
+          u.assignedOfficeCode = office.code;
+        }
+      });
+    } else if (oldName && oldName !== office.name) {
+      // Name changed, update in daily reports and attendance
+      this.state.dailyReports.forEach(r => {
+        if (r.officeCode.toUpperCase() === office.code.toUpperCase()) {
+          r.officeName = office.name;
+        }
+      });
+      this.state.attendanceRecords.forEach(a => {
+        if (a.officeCode.toUpperCase() === office.code.toUpperCase()) {
+          a.officeName = office.name;
+        }
+      });
     }
 
     this.addAuditLog({
@@ -1387,11 +1252,61 @@ class DatabaseService {
       userName: actor.name,
       userRole: actor.role,
       action: 'CONFIG_CHANGE',
-      details: `Updated office profile and management parameters for ${office.name} [${office.code}] (Zone: ${office.zoneName || 'Larkana'}, Zone Code: ${office.zoneCode || 'Z050D'}).`,
+      details: `Saved office profile parameters for ${office.name} [Code: ${office.code}]. ${
+        oldCode && oldCode.toUpperCase() !== office.code.toUpperCase()
+          ? `Office code changed from ${oldCode} to ${office.code} with full database cascade.`
+          : ''
+      }`,
+      officeCode: office.code,
+    });
+
+    this.persist();
+    return mergedOffice;
+  }
+
+  public deleteOffice(identifier: string, actor: { id: string; name: string; role: any }): boolean {
+    const target = this.state.offices.find(
+      o => (o.id && o.id.toLowerCase() === identifier.toLowerCase()) ||
+           o.code.toUpperCase() === identifier.toUpperCase()
+    );
+    if (!target) return false;
+
+    this.state.offices = this.state.offices.filter(o => o !== target);
+    this.addAuditLog({
+      userId: actor.id,
+      userName: actor.name,
+      userRole: actor.role,
+      action: 'CONFIG_CHANGE',
+      details: `Deleted office ${target.name} [Code: ${target.code}] from operational database.`,
+      officeCode: target.code,
+    });
+    this.persist();
+    return true;
+  }
+
+  public addTenureRecord(
+    officeIdentifier: string,
+    record: LeadershipTenureRecord,
+    actor: { id: string; name: string; role: any }
+  ): boolean {
+    const office = this.getOfficeByIdentifier(officeIdentifier);
+    if (!office) return false;
+
+    if (!office.leadershipHistory) {
+      office.leadershipHistory = [];
+    }
+
+    office.leadershipHistory.unshift(record);
+    this.addAuditLog({
+      userId: actor.id,
+      userName: actor.name,
+      userRole: actor.role,
+      action: 'CONFIG_CHANGE',
+      details: `Recorded leadership tenure entry for ${record.name} (${record.roleTitle}) at ${office.name}.`,
       officeCode: office.code,
     });
     this.persist();
-    return updatedOffice;
+    return true;
   }
 
   // --- Daily Reports ---
@@ -1467,28 +1382,48 @@ class DatabaseService {
     return report;
   }
 
+  public deleteDailyReport(id: string, actor: { id: string; name: string; role: any }): boolean {
+    const initialLen = this.state.dailyReports.length;
+    this.state.dailyReports = this.state.dailyReports.filter(r => r.id !== id);
+    if (this.state.dailyReports.length !== initialLen) {
+      this.addAuditLog({
+        userId: actor.id,
+        userName: actor.name,
+        userRole: actor.role,
+        action: 'EDIT_RECORD',
+        details: `Deleted daily report ID [${id}]`,
+      });
+      this.persist();
+      return true;
+    }
+    return false;
+  }
+
   public batchImportReports(
     reports: OfficeDailyReport[],
     actor: { id: string; name: string; role: any },
-    sourceUploadTitle?: string
-  ): { importedCount: number; updatedCount: number } {
-    let importedCount = 0;
+    reportTitle?: string
+  ): { addedCount: number; updatedCount: number } {
+    let addedCount = 0;
     let updatedCount = 0;
 
-    for (const report of reports) {
+    for (const rep of reports) {
       const idx = this.state.dailyReports.findIndex(
-        r => r.officeCode.toUpperCase() === report.officeCode.toUpperCase() && r.date === report.date
+        r => r.officeCode.toUpperCase() === rep.officeCode.toUpperCase() && r.date === rep.date
       );
-
       if (idx >= 0) {
         this.state.dailyReports[idx] = {
-          ...report,
+          ...this.state.dailyReports[idx],
+          ...rep,
           reportingStatus: 'REPORTED',
         };
         updatedCount++;
       } else {
-        this.state.dailyReports.push(report);
-        importedCount++;
+        this.state.dailyReports.push({
+          ...rep,
+          reportingStatus: 'REPORTED',
+        });
+        addedCount++;
       }
     }
 
@@ -1497,31 +1432,23 @@ class DatabaseService {
       userName: actor.name,
       userRole: actor.role,
       action: 'CONFIRM_IMPORT',
-      details: `Batch imported ${reports.length} office reports (${importedCount} new, ${updatedCount} updated) from OCR job [${sourceUploadTitle || 'Spreadsheet Upload'}] for date ${reports[0]?.date || 'N/A'}.`,
+      details: `Batch imported ${reports.length} daily reports (${addedCount} new, ${updatedCount} updated) via [${reportTitle || 'OCR / Manual Entry'}]`,
       reportingDate: reports[0]?.date,
     });
 
     this.persist();
-    return { importedCount, updatedCount };
+    return { addedCount, updatedCount };
   }
 
-  // --- Employee Attendance Records ---
-  public getAttendanceRecords(date?: string, officeCode?: string, statusFilter?: string): EmployeeAttendanceRecord[] {
-    let list = this.state.attendanceRecords || [];
-    if (date) {
-      list = list.filter(r => r.date === date);
-    }
-    if (officeCode && officeCode !== 'ALL') {
-      list = list.filter(r => r.officeCode.toUpperCase() === officeCode.toUpperCase());
-    }
-    if (statusFilter && statusFilter !== 'ALL') {
-      if (statusFilter === 'LATE_ALL') {
-        list = list.filter(r => r.status === 'LATE_745' || r.status === 'LATE_800');
-      } else {
-        list = list.filter(r => r.status === statusFilter);
-      }
-    }
-    return list;
+  // --- Attendance Records ---
+  public getAttendanceRecords(date?: string, officeCode?: string, status?: string): EmployeeAttendanceRecord[] {
+    if (!this.state.attendanceRecords) return [];
+    return this.state.attendanceRecords.filter(r => {
+      if (date && r.date !== date) return false;
+      if (officeCode && officeCode !== 'ALL' && r.officeCode.toUpperCase() !== officeCode.toUpperCase()) return false;
+      if (status && status !== 'ALL' && r.status !== status) return false;
+      return true;
+    }).sort((a, b) => b.checkInTime.localeCompare(a.checkInTime));
   }
 
   public saveAttendanceRecord(
@@ -1531,22 +1458,31 @@ class DatabaseService {
     if (!this.state.attendanceRecords) {
       this.state.attendanceRecords = [];
     }
+
     const idx = this.state.attendanceRecords.findIndex(r => r.id === record.id);
     if (idx >= 0) {
       this.state.attendanceRecords[idx] = record;
+      this.addAuditLog({
+        userId: actor.id,
+        userName: actor.name,
+        userRole: actor.role,
+        action: 'EDIT_RECORD',
+        details: `Updated attendance record for ${record.employeeName} (${record.officeName}) on ${record.date}`,
+        reportingDate: record.date,
+        officeCode: record.officeCode,
+      });
     } else {
       this.state.attendanceRecords.unshift(record);
+      this.addAuditLog({
+        userId: actor.id,
+        userName: actor.name,
+        userRole: actor.role,
+        action: 'EDIT_RECORD',
+        details: `Logged attendance check-in for ${record.employeeName} (${record.checkInTime}) at ${record.officeName}`,
+        reportingDate: record.date,
+        officeCode: record.officeCode,
+      });
     }
-
-    this.addAuditLog({
-      userId: actor.id,
-      userName: actor.name,
-      userRole: actor.role,
-      action: 'EDIT_RECORD',
-      details: `Saved attendance for ${record.employeeName} (${record.officeCode}) - Time: ${record.checkInTime}, Status: ${record.status}`,
-      reportingDate: record.date,
-      officeCode: record.officeCode,
-    });
 
     this.persist();
     return record;

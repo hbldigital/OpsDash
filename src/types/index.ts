@@ -17,9 +17,40 @@ export interface StaffBreakdown {
   totalStaff: number; // calculated sum
 }
 
+export interface LeadershipTenureRecord {
+  id: string;
+  role: 'OIC' | '2IC' | 'OA';
+  roleTitle: string; // e.g. "Office Incharge (OIC)", "Second Incharge (2IC)", "Office Assistant (OA)"
+  name: string;
+  designation: string;
+  grade?: string;
+  tasks?: string;
+  contact?: string;
+  whatsappNumber?: string;
+  startDate: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD or empty if currently serving
+  isCurrent: boolean;
+  tenureDuration?: string;
+  transferOrderNo?: string;
+  remarks?: string;
+}
+
+export interface OfficeAssistantDetails {
+  name: string;
+  designation?: string;
+  grade?: string;
+  responsibilities?: string;
+  mobileNumber?: string;
+  whatsappNumber?: string;
+  startDate?: string;
+  contacts: ContactDetail[];
+}
+
 export interface Office {
+  id?: string;
   code: string;
   name: string;
+  shift?: 'Morning' | 'Evening' | 'Regular' | string;
   zoneCode: string; // default "Z050D"
   zoneName: string; // default "Larkana"
   district: string;
@@ -30,18 +61,33 @@ export interface Office {
   incharge?: {
     name: string;
     designation?: string;
+    grade?: string;
+    startDate?: string;
+    contacts: ContactDetail[];
+  };
+  secondIncharge?: {
+    name: string;
+    designation?: string;
+    grade?: string;
+    startDate?: string;
     contacts: ContactDetail[];
   };
   assistant?: {
     name: string;
     designation?: string;
+    grade?: string;
+    responsibilities?: string;
+    mobileNumber?: string;
+    whatsappNumber?: string;
+    startDate?: string;
     contacts: ContactDetail[];
   };
+  leadershipHistory?: LeadershipTenureRecord[];
   staffBreakdown?: StaffBreakdown;
-  type: 'NRC' | 'DAU' | 'Executive NRC' | 'MRV';
+  type: 'NRC' | 'DAU' | 'Executive NRC' | 'Executive' | 'MRV' | 'NRC Counter' | string;
   isActive: boolean;
   totalCounters?: number;
-  dailyCapacity: number;
+  dailyCapacity?: number;
   // Backward compatibility
   zone?: string;
   expectedStaff?: number;
@@ -77,10 +123,13 @@ export interface User {
 export interface DailyReport {
   id: string;
   reportingDate: string;
+  date?: string;
+  zone?: string;
   zoneCode: string;
   officeCode: string;
   officeName: string;
-  reportingStatus: 'Submitted' | 'Verified' | 'Discrepancy' | 'Draft';
+  reportingStatus: 'Submitted' | 'Verified' | 'Discrepancy' | 'Draft' | 'REPORTED' | 'CORRECTED';
+  submissionTime?: string;
 
   // Attendance
   totalEmployees: number;
@@ -104,6 +153,7 @@ export interface DailyReport {
   // Approved OneApp
   approvedOneApp: number;
   previousDayApproved: number;
+  approvedDifference?: number;
 
   // Facial Recognition
   diminishedFingerprintsMBVS: number;
@@ -117,6 +167,7 @@ export interface DailyReport {
   // Metadata
   hasDiscrepancy: boolean;
   discrepancyDetails?: string;
+  discrepancies?: any[];
   sourceType: 'MANUAL' | 'OCR_EXTRACTED' | 'IMPORT_BATCH';
   sourceImageUrl?: string;
   submittedBy: string;

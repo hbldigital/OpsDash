@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   FileSpreadsheet,
   Search,
@@ -9,9 +9,12 @@ import {
   Clock,
   Eye,
   CheckCircle2,
+  FileDown,
+  FileText,
 } from 'lucide-react';
 import { DailyReport, Office } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
+import { exportElementToJpg, exportElementToPdf } from '../../utils/exportEngine';
 
 interface DailyReportsViewProps {
   reports: DailyReport[];
@@ -45,8 +48,41 @@ export const DailyReportsView: React.FC<DailyReportsViewProps> = ({
     });
   }, [reports, search, selectedOfficeCode, statusFilter]);
 
+  const tableRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState<string | null>(null);
+
   const handleExportCsv = () => {
     window.location.href = `/api/export?date=${currentDate}&format=csv`;
+  };
+
+  const handleExportJpg = async () => {
+    if (!tableRef.current) return;
+    setIsExporting('jpg');
+    try {
+      await exportElementToJpg(tableRef.current, {
+        filename: `NADRA_Zone-D_Larkana_Daily_Reports_${currentDate}`,
+        title: `Zone-D Larkana Daily Operational Progress Registry - ${currentDate}`,
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsExporting(null);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!tableRef.current) return;
+    setIsExporting('pdf');
+    try {
+      await exportElementToPdf(tableRef.current, {
+        filename: `NADRA_Zone-D_Larkana_Daily_Reports_${currentDate}`,
+        title: `Zone-D Larkana Daily Operational Progress Registry - ${currentDate}`,
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsExporting(null);
+    }
   };
 
   return (
@@ -67,13 +103,33 @@ export const DailyReportsView: React.FC<DailyReportsViewProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={handleExportCsv}
-          className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-sm transition-colors whitespace-nowrap"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Export All Records (CSV)
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleExportJpg}
+            disabled={isExporting !== null}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-100 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg shadow-sm transition-colors whitespace-nowrap disabled:opacity-50"
+          >
+            <FileDown className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{isExporting === 'jpg' ? 'Generating...' : 'Save in JPG'}</span>
+          </button>
+
+          <button
+            onClick={handleExportPdf}
+            disabled={isExporting !== null}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-100 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg shadow-sm transition-colors whitespace-nowrap disabled:opacity-50"
+          >
+            <FileText className="w-3.5 h-3.5 text-indigo-400" />
+            <span>{isExporting === 'pdf' ? 'Generating...' : 'Save in PDF'}</span>
+          </button>
+
+          <button
+            onClick={handleExportCsv}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-sm transition-colors whitespace-nowrap"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Filter Bar */}
@@ -115,7 +171,7 @@ export const DailyReportsView: React.FC<DailyReportsViewProps> = ({
       </div>
 
       {/* Reports Table */}
-      <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+      <div ref={tableRef} id="daily-reports-table-container" className="p-4 rounded-xl bg-slate-900 border border-slate-800">
         <div className="overflow-x-auto border border-slate-800 rounded-lg">
           <table className="w-full text-left text-xs whitespace-nowrap">
             <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">

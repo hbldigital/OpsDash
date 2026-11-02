@@ -49,6 +49,31 @@ function matchOffice(rawCode: string, rawName: string) {
   return null;
 }
 
+function detectImageMimeType(buf: Buffer): string | null {
+  if (buf.length < 4) return null;
+  // JPEG: FF D8 FF
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) {
+    return 'image/jpeg';
+  }
+  // PNG: 89 50 4E 47
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) {
+    return 'image/png';
+  }
+  // GIF: 47 49 46 38
+  if (buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x38) {
+    return 'image/gif';
+  }
+  // WebP: RIFF .... WEBP
+  if (
+    buf.length >= 12 &&
+    buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46 &&
+    buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50
+  ) {
+    return 'image/webp';
+  }
+  return null;
+}
+
 export async function processReportImage(
   base64Data: string,
   mimeType: string,
@@ -58,8 +83,20 @@ export async function processReportImage(
   const knownOffices = db.getOffices();
   const today = '2026-10-25';
 
-  // If Gemini API key is available, use real Gemini 3.8 Flash model
-  if (ai) {
+  const cleanBase64 = (base64Data || '').trim().replace(/^data:image\/[a-zA-Z0-9.+]+;base64,/, '').replace(/\s+/g, '');
+  let imageBuf: Buffer | null = null;
+  try {
+    imageBuf = cleanBase64 ? Buffer.from(cleanBase64, 'base64') : null;
+  } catch {
+    imageBuf = null;
+  }
+
+  const detectedMime = imageBuf ? detectImageMimeType(imageBuf) : null;
+  const isRealImage = !!detectedMime;
+  const safeMime = detectedMime || 'image/jpeg';
+
+  // If Gemini API key is available and input is a valid image, call Gemini 3.8 Flash model
+  if (ai && isRealImage && imageBuf) {
     try {
       const prompt = `
 You are an expert OCR and document understanding specialist for NADRA Pakistan (National Database and Registration Authority).
@@ -85,7 +122,7 @@ Return ONLY a valid JSON object matching the requested schema.
         model: 'gemini-3.8-flash',
         contents: {
           parts: [
-            { inlineData: { mimeType: mimeType || 'image/png', data: base64Data } },
+            { inlineData: { mimeType: safeMime, data: imageBuf.toString('base64') } },
             { text: prompt },
           ],
         },
@@ -370,7 +407,19 @@ export async function processAttendanceSheetImage(
   const t1 = options.threshold1 || '07:45';
   const t2 = options.threshold2 || '08:00';
 
-  if (ai) {
+  const cleanBase64 = (base64Data || '').trim().replace(/^data:image\/[a-zA-Z0-9.+]+;base64,/, '').replace(/\s+/g, '');
+  let imageBuf: Buffer | null = null;
+  try {
+    imageBuf = cleanBase64 ? Buffer.from(cleanBase64, 'base64') : null;
+  } catch {
+    imageBuf = null;
+  }
+
+  const detectedMime = imageBuf ? detectImageMimeType(imageBuf) : null;
+  const isRealImage = !!detectedMime;
+  const safeMime = detectedMime || 'image/jpeg';
+
+  if (ai && isRealImage && imageBuf) {
     try {
       const prompt = `
 You are an expert OCR and document understanding specialist for NADRA Pakistan.
@@ -394,10 +443,10 @@ Return valid JSON with detectedDate, detectedOfficeCode, and an array of records
 `;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.8-flash',
         contents: {
           parts: [
-            { inlineData: { mimeType: mimeType || 'image/png', data: base64Data } },
+            { inlineData: { mimeType: safeMime, data: imageBuf.toString('base64') } },
             { text: prompt },
           ],
         },

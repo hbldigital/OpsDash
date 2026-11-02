@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef } from 'react';
-import { X, Download, Printer, FileSpreadsheet, FileText, CheckCircle } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { X, Download, Printer, FileSpreadsheet, FileText, CheckCircle, FileDown } from 'lucide-react';
 import { OfficeDailyReport, ZoneSummaryMetrics } from '../../types/dashboard';
 import { formatPercentage } from '../../utils/calculations';
+import { exportElementToJpg, exportElementToPdf } from '../../utils/exportEngine';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -118,6 +119,38 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     window.print();
   };
 
+  const [isExporting, setIsExporting] = useState<string | null>(null);
+
+  const handleExportJpg = async () => {
+    if (!printAreaRef.current) return;
+    setIsExporting('jpg');
+    try {
+      await exportElementToJpg(printAreaRef.current, {
+        filename: `NADRA_Zone-D_Larkana_Report_${currentDate}`,
+        title: `Zone-D Larkana Daily Operational Progress Report - ${currentDate}`,
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsExporting(null);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!printAreaRef.current) return;
+    setIsExporting('pdf');
+    try {
+      await exportElementToPdf(printAreaRef.current, {
+        filename: `NADRA_Zone-D_Larkana_Report_${currentDate}`,
+        title: `Zone-D Larkana Daily Operational Progress Report - ${currentDate}`,
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsExporting(null);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-4xl w-full shadow-2xl my-8">
@@ -140,21 +173,39 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
         <div className="p-5 space-y-5">
           {/* Export Action Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <button
+              onClick={handleExportJpg}
+              disabled={isExporting !== null}
+              className="flex flex-col items-center justify-center gap-1.5 p-3 bg-slate-950 hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-100 transition-all hover:border-emerald-500 shadow-sm disabled:opacity-50"
+            >
+              <FileDown className="w-4 h-4 text-emerald-400" />
+              <span>{isExporting === 'jpg' ? 'Generating...' : 'Save JPG Report'}</span>
+            </button>
+
+            <button
+              onClick={handleExportPdf}
+              disabled={isExporting !== null}
+              className="flex flex-col items-center justify-center gap-1.5 p-3 bg-slate-950 hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-100 transition-all hover:border-indigo-500 shadow-sm disabled:opacity-50"
+            >
+              <FileText className="w-4 h-4 text-indigo-400" />
+              <span>{isExporting === 'pdf' ? 'Generating...' : 'Save PDF Report'}</span>
+            </button>
+
             <button
               onClick={handleExportCsv}
-              className="flex items-center justify-center gap-2 p-3 bg-slate-950 hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-100 transition-all hover:border-emerald-500 shadow-sm"
+              className="flex flex-col items-center justify-center gap-1.5 p-3 bg-slate-950 hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-100 transition-all hover:border-blue-500 shadow-sm"
             >
-              <Download className="w-4 h-4 text-emerald-400" />
-              <span>Download CSV Spreadsheet (Excel Compatible)</span>
+              <Download className="w-4 h-4 text-blue-400" />
+              <span>Download CSV</span>
             </button>
 
             <button
               onClick={handlePrint}
-              className="flex items-center justify-center gap-2 p-3 bg-slate-950 hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-100 transition-all hover:border-blue-500 shadow-sm"
+              className="flex flex-col items-center justify-center gap-1.5 p-3 bg-slate-950 hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-100 transition-all hover:border-slate-500 shadow-sm"
             >
-              <Printer className="w-4 h-4 text-blue-400" />
-              <span>Print Official Daily Progress Ledger</span>
+              <Printer className="w-4 h-4 text-slate-300" />
+              <span>Print Ledger</span>
             </button>
           </div>
 

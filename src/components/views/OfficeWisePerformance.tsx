@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Building2,
   Calendar,
@@ -19,10 +19,13 @@ import {
   Edit,
   History,
   TrendingUp,
+  FileDown,
+  FileText,
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { Office, OfficeDailyReport } from '../../types/dashboard';
 import { formatPercentage } from '../../utils/calculations';
+import { exportElementToJpg, exportElementToPdf } from '../../utils/exportEngine';
 
 interface OfficeWisePerformanceProps {
   offices: Office[];
@@ -74,12 +77,45 @@ export const OfficeWisePerformance: React.FC<OfficeWisePerformanceProps> = ({
       }));
   }, [officeHistory]);
 
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState<string | null>(null);
+
+  const handleExportJpg = async () => {
+    if (!reportRef.current) return;
+    setIsExporting('jpg');
+    try {
+      await exportElementToJpg(reportRef.current, {
+        filename: `NADRA_${currentOffice.code}_Report_${currentDate}`,
+        title: `${currentOffice.name} [${currentOffice.code}] Daily Operational Progress Report - ${currentDate}`,
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsExporting(null);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!reportRef.current) return;
+    setIsExporting('pdf');
+    try {
+      await exportElementToPdf(reportRef.current, {
+        filename: `NADRA_${currentOffice.code}_Report_${currentDate}`,
+        title: `${currentOffice.name} [${currentOffice.code}] Daily Operational Progress Report - ${currentDate}`,
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsExporting(null);
+    }
+  };
+
   if (!currentOffice) {
     return <div className="text-slate-400 p-8 text-center">No office data available.</div>;
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div ref={reportRef} id="office-performance-report-container" className="space-y-6 pb-12">
       {/* Office Header & Selection Dropdown */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -128,6 +164,26 @@ export const OfficeWisePerformance: React.FC<OfficeWisePerformanceProps> = ({
                 ))}
               </select>
             </div>
+
+            <button
+              onClick={handleExportJpg}
+              disabled={isExporting !== null}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-colors disabled:opacity-50"
+              title="Download official office report in high-resolution JPG"
+            >
+              <FileDown className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{isExporting === 'jpg' ? 'Saving...' : 'Save in JPG'}</span>
+            </button>
+
+            <button
+              onClick={handleExportPdf}
+              disabled={isExporting !== null}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 rounded-lg text-xs font-semibold shadow-sm transition-colors disabled:opacity-50"
+              title="Download official office report in PDF"
+            >
+              <FileText className="w-3.5 h-3.5 text-indigo-400" />
+              <span>{isExporting === 'pdf' ? 'Saving...' : 'Save in PDF'}</span>
+            </button>
 
             <button
               onClick={() => onOpenManualEntry(currentOffice.code)}

@@ -65,8 +65,8 @@ apiRouter.get('/offices', (_req: Request, res: Response) => {
   res.json({ success: true, offices: db.getOffices() });
 });
 
-apiRouter.get('/offices/:code', (req: Request, res: Response) => {
-  const office = db.getOfficeByCode(req.params.code);
+apiRouter.get('/offices/:identifier', (req: Request, res: Response) => {
+  const office = db.getOfficeByIdentifier(req.params.identifier);
   if (!office) {
     res.status(404).json({ success: false, error: 'Office not found' });
     return;
@@ -80,11 +80,45 @@ apiRouter.post('/offices', (req: Request, res: Response) => {
   res.json({ success: true, office });
 });
 
-apiRouter.put('/offices/:code', (req: Request, res: Response) => {
+apiRouter.put('/offices/:identifier', (req: Request, res: Response) => {
   const actor = getActingUser(req);
-  const data = { ...req.body, code: req.params.code };
-  const office = db.saveOffice(data, actor);
+  // Pass previousIdentifier to allow updating custom code and cascading changes
+  const office = db.saveOffice(req.body, actor, req.params.identifier);
   res.json({ success: true, office });
+});
+
+apiRouter.delete('/offices/:identifier', (req: Request, res: Response) => {
+  const actor = getActingUser(req);
+  const ok = db.deleteOffice(req.params.identifier, actor);
+  res.json({ success: ok });
+});
+
+apiRouter.post('/offices/:identifier/tenure', (req: Request, res: Response) => {
+  const actor = getActingUser(req);
+  const record = req.body;
+  if (!record || !record.name || !record.startDate) {
+    res.status(400).json({ success: false, error: 'Missing required tenure record fields (name, startDate)' });
+    return;
+  }
+  const ok = db.addTenureRecord(req.params.identifier, {
+    id: record.id || `ten-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    role: record.role || 'OIC',
+    roleTitle: record.roleTitle || (record.role === 'OA' ? 'Office Assistant (OA)' : record.role === '2IC' ? 'Second Incharge (2IC)' : 'Office Incharge (OIC)'),
+    name: record.name,
+    designation: record.designation || 'Officer',
+    grade: record.grade || 'BPS-17',
+    tasks: record.tasks || '',
+    contact: record.contact || '',
+    whatsappNumber: record.whatsappNumber || '',
+    startDate: record.startDate,
+    endDate: record.endDate || '',
+    isCurrent: !record.endDate,
+    tenureDuration: record.tenureDuration || '',
+    transferOrderNo: record.transferOrderNo || '',
+    remarks: record.remarks || '',
+  }, actor);
+
+  res.json({ success: ok, office: db.getOfficeByIdentifier(req.params.identifier) });
 });
 
 // ----------------------------------------------------
@@ -799,8 +833,14 @@ apiRouter.post('/reports/entry', (req: Request, res: Response) => {
     return;
   }
 
+  const oneappIssued = data.oneappIssued ?? data.oneAppIssued ?? 0;
+  const oneappProcessed = data.oneappProcessed ?? data.oneAppProcessed ?? 0;
+  const oneappSkipped = data.oneappSkipped ?? data.oneAppSkipped ?? 0;
+  const prevDayApproved = data.prevDayApprovedOneApp ?? data.previousDayApproved ?? 0;
+  const proofOfLife = data.proofOfLifeCertificates ?? data.proofOfLife ?? 0;
+
   const qCalc = calculateQMatic(data.qmaticIssued || 0, data.qmaticProcessed || 0);
-  const oneCalc = calculateOneApp(data.oneappIssued || 0, data.oneappProcessed || 0, data.oneappSkipped || 0);
+  const oneCalc = calculateOneApp(oneappIssued, oneappProcessed, oneappSkipped);
   const attCalc = calculateAttendance(data.totalEmployees || 0, data.lateAfter745 || 0, data.lateAfter800 || 0);
 
   const discrepancies: string[] = [];
@@ -814,7 +854,7 @@ apiRouter.post('/reports/entry', (req: Request, res: Response) => {
     zone: data.zone || 'Zone-D Larkana',
     officeCode: data.officeCode,
     officeName: data.officeName,
-    reportingStatus: 'CORRECTED',
+    reportingStatus: 'REPORTED',
     submissionTime: new Date().toISOString(),
     submittedBy: actor.name,
     verifiedBy: actor.name,
@@ -829,18 +869,18 @@ apiRouter.post('/reports/entry', (req: Request, res: Response) => {
     qmaticRemaining: qCalc.remaining,
     qmaticPercentage: qCalc.percentage,
 
-    oneappIssued: data.oneappIssued || 0,
-    oneappProcessed: data.oneappProcessed || 0,
-    oneappSkipped: data.oneappSkipped || 0,
+    oneappIssued,
+    oneappProcessed,
+    oneappSkipped,
     oneappRemaining: oneCalc.remaining,
     oneappReconciliationPercentage: oneCalc.percentage,
 
     approvedOneApp: data.approvedOneApp || 0,
-    prevDayApprovedOneApp: data.prevDayApprovedOneApp || 0,
-    approvedDifference: (data.approvedOneApp || 0) - (data.prevDayApprovedOneApp || 0),
+    prevDayApprovedOneApp: prevDayApproved,
+    approvedDifference: (data.approvedOneApp || 0) - prevDayApproved,
 
     diminishedFingerprintsMBVS: data.diminishedFingerprintsMBVS || 0,
-    proofOfLifeCertificates: data.proofOfLifeCertificates || 0,
+    proofOfLifeCertificates: proofOfLife,
 
     pakidApproved: data.pakidApproved || 0,
     pakidDeferred: data.pakidDeferred || 0,

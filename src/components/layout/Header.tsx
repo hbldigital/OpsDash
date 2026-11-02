@@ -15,9 +15,12 @@ import {
   Building2,
   Menu,
   Sliders,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { User } from '../../types';
 import { useLocalization } from '../../context/LocalizationContext';
+import { useTheme } from '../../context/ThemeContext';
 
 interface HeaderProps {
   currentDate: string;
@@ -45,6 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSettings,
 }) => {
   const { getText, zoneName, zoneCode } = useLocalization();
+  const { theme, toggleTheme, isDark } = useTheme();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -210,6 +214,26 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             )}
           </div>
+
+          {/* Day & Night Mode Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-700/80 bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-colors"
+            title={isDark ? 'Switch to Day Mode (White Theme)' : 'Switch to Night Mode (Dark Theme)'}
+            aria-label="Toggle day or night theme"
+          >
+            {isDark ? (
+              <>
+                <Sun className="w-4 h-4 text-amber-400" />
+                <span className="hidden md:inline text-[11px]">Day Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-4 h-4 text-indigo-400" />
+                <span className="hidden md:inline text-[11px]">Night Mode</span>
+              </>
+            )}
+          </button>
 
           {/* Fullscreen Toggle */}
           <button

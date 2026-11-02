@@ -28,7 +28,10 @@ import { ReportCorrectionModal } from './components/modals/ReportCorrectionModal
 import { ExportModal } from './components/modals/ExportModal';
 import { OfficeProfileModal } from './components/modals/OfficeProfileModal';
 import { OfficeEditModal } from './components/modals/OfficeEditModal';
+import { AddOfficeModal } from './components/modals/AddOfficeModal';
+import { DailyReportManualEntryModal } from './components/modals/DailyReportManualEntryModal';
 import { LocalizationProvider, useLocalization } from './context/LocalizationContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 import {
   Office,
@@ -44,7 +47,7 @@ function AppContent() {
   const [currentDate, setCurrentDate] = useState('2026-10-25');
   const [dateRangeMode, setDateRangeMode] = useState<'single' | 'range'>('single');
   const [currentView, setCurrentView] = useState<NavView>('overview');
-  const [selectedOfficeCode, setSelectedOfficeCode] = useState<string>('LKR-01');
+  const [selectedOfficeCode, setSelectedOfficeCode] = useState<string>('10501');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -52,6 +55,8 @@ function AppContent() {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<DailyReport | null>(null);
   const [isCorrectionModalOpen, setIsCorrectionModalOpen] = useState(false);
+  const [isAddOfficeOpen, setIsAddOfficeOpen] = useState(false);
+  const [isManualReportOpen, setIsManualReportOpen] = useState(false);
 
   // Office Profile & Office Edit Modals
   const [selectedOfficeProfileCode, setSelectedOfficeProfileCode] = useState<string | null>(null);
@@ -213,9 +218,10 @@ function AppContent() {
   };
 
   // Save Office Edits
-  const handleSaveOffice = async (updatedOffice: Office) => {
+  const handleSaveOffice = async (updatedOffice: Office, previousIdentifier?: string) => {
     try {
-      const res = await fetch(`/api/offices/${updatedOffice.code}`, {
+      const idOrCode = previousIdentifier || updatedOffice.id || updatedOffice.code;
+      const res = await fetch(`/api/offices/${encodeURIComponent(idOrCode)}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -226,12 +232,101 @@ function AppContent() {
       const data = await res.json();
       if (data.success && data.office) {
         setOffices((prev) =>
-          prev.map((o) => (o.code === updatedOffice.code ? { ...o, ...data.office } : o))
+          prev.map((o) =>
+            o.id === data.office.id || o.code === (previousIdentifier || updatedOffice.code)
+              ? data.office
+              : o
+          )
         );
         setEditingOffice(null);
+        await loadAll(currentDate);
       }
     } catch (err) {
-      console.error('Failed to save office updates:', err);
+      console.error('Failed to update office:', err);
+    }
+  };
+
+  // Add New Office
+  const handleAddOffice = async (newOffice: Office) => {
+    try {
+      const res = await fetch('/api/offices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser?.id || 'u-1',
+        },
+        body: JSON.stringify(newOffice),
+      });
+      const data = await res.json();
+      if (data.success && data.office) {
+        setOffices((prev) => [...prev, data.office]);
+        setIsAddOfficeOpen(false);
+        await loadAll(currentDate);
+      }
+    } catch (err) {
+      console.error('Failed to add office:', err);
+    }
+  };
+
+  // Delete Office
+  const handleDeleteOffice = async (identifier: string) => {
+    try {
+      const res = await fetch(`/api/offices/${encodeURIComponent(identifier)}`, {
+        method: 'DELETE',
+        headers: {
+          'x-user-id': currentUser?.id || 'u-1',
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOffices((prev) =>
+          prev.filter(
+            (o) =>
+              (o.id ? o.id !== identifier : true) &&
+              o.code.toUpperCase() !== identifier.toUpperCase()
+          )
+        );
+        if (selectedOfficeProfileCode?.toUpperCase() === identifier.toUpperCase()) {
+          setSelectedOfficeProfileCode(null);
+        }
+        if (
+          editingOffice?.code.toUpperCase() === identifier.toUpperCase() ||
+          editingOffice?.id === identifier
+        ) {
+          setEditingOffice(null);
+        }
+        await loadAll(currentDate);
+      }
+    } catch (err) {
+      console.error('Failed to delete office:', err);
+    }
+  };
+
+  // Save Manual Daily Operational Report
+  const handleSaveManualReport = async (report: DailyReport) => {
+    try {
+      const res = await fetch('/api/reports/entry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser?.id || 'u-1',
+        },
+        body: JSON.stringify({
+          ...report,
+          date: report.date || currentDate,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        await Promise.all([
+          loadDashboardData(currentDate),
+          loadHistory(),
+          loadDataQualityCount(),
+        ]);
+        setIsManualReportOpen(false);
+      }
+    } catch (err) {
+      console.error('Failed to save manual daily report:', err);
     }
   };
 
@@ -347,6 +442,7 @@ function AppContent() {
                     onSelectOffice={handleSelectOffice}
                     onSelectOfficeProfile={handleSelectOfficeProfile}
                     onNavigate={setCurrentView}
+                    onOpenManualReport={() => setIsManualReportOpen(true)}
                   />
                 )}
 
@@ -477,6 +573,8 @@ function AppContent() {
                     onSelectOffice={handleSelectOffice}
                     onSelectOfficeProfile={handleSelectOfficeProfile}
                     onEditOffice={(o) => setEditingOffice(o)}
+                    onOpenAddOffice={() => setIsAddOfficeOpen(true)}
+                    onDeleteOffice={handleDeleteOffice}
                   />
                 )}
 
@@ -518,8 +616,25 @@ function AppContent() {
           isOpen={!!editingOffice}
           onClose={() => setEditingOffice(null)}
           onSave={handleSaveOffice}
+          onDeleteOffice={handleDeleteOffice}
         />
       )}
+
+      {/* Add New Office Modal */}
+      <AddOfficeModal
+        isOpen={isAddOfficeOpen}
+        onClose={() => setIsAddOfficeOpen(false)}
+        onAddOffice={handleAddOffice}
+      />
+
+      {/* Manual Daily Operational Report Modal */}
+      <DailyReportManualEntryModal
+        isOpen={isManualReportOpen}
+        onClose={() => setIsManualReportOpen(false)}
+        offices={offices}
+        currentDate={currentDate}
+        onSaveReport={handleSaveManualReport}
+      />
 
       {/* Report Correction Modal */}
       {editingReport && isCorrectionModalOpen && (
@@ -549,8 +664,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <LocalizationProvider>
-      <AppContent />
-    </LocalizationProvider>
+    <ThemeProvider>
+      <LocalizationProvider>
+        <AppContent />
+      </LocalizationProvider>
+    </ThemeProvider>
   );
 }

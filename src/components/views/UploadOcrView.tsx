@@ -38,7 +38,8 @@ export const UploadOcrView: React.FC<UploadOcrViewProps> = ({
   const [editableRows, setEditableRows] = useState<any[]>([]);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -212,42 +213,49 @@ export const UploadOcrView: React.FC<UploadOcrViewProps> = ({
       {!ocrResult && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="p-8 border-2 border-dashed border-slate-700 hover:border-blue-500/80 rounded-2xl bg-slate-900/50 hover:bg-slate-900/80 transition-all flex flex-col items-center justify-center text-center cursor-pointer min-h-[260px]"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-4">
+            <div className="p-6 border-2 border-dashed border-slate-700 hover:border-blue-500/80 rounded-2xl bg-slate-900/50 transition-all flex flex-col items-center justify-center text-center min-h-[260px]">
+              <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-3">
                 <Upload className="w-7 h-7" />
               </div>
               <h3 className="text-sm font-semibold text-white">
-                Drag & Drop Daily Progress Report Image Here
+                Upload Daily Progress Report Image
               </h3>
               <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                Supports photographed spreadsheets, tilted mobile photos, JPEG, PNG, WebP, or screenshots.
+                Choose an image from your files / phone gallery, or take a live photograph with your camera.
               </p>
 
-              <div className="mt-4 flex items-center gap-3">
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
                 <button
                   type="button"
-                  className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-sm transition-colors"
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="px-4 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md transition-all flex items-center gap-2"
                 >
-                  Browse Files
+                  <Upload className="w-4 h-4" />
+                  <span>Choose from Gallery / Files</span>
                 </button>
+
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fileInputRef.current?.click();
-                  }}
-                  className="px-3.5 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors flex items-center gap-1.5"
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="px-4 py-2.5 text-xs font-bold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all flex items-center gap-2"
                 >
-                  <Camera className="w-3.5 h-3.5" />
-                  Capture Photo
+                  <Camera className="w-4 h-4 text-emerald-400" />
+                  <span>Take Photo with Camera</span>
                 </button>
               </div>
 
+              {/* Standard file input without capture */}
               <input
-                ref={fileInputRef}
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+
+              {/* Camera capture input */}
+              <input
+                ref={cameraInputRef}
                 type="file"
                 accept="image/*"
                 capture="environment"

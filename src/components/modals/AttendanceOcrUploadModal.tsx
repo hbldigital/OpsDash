@@ -46,7 +46,8 @@ export const AttendanceOcrUploadModal: React.FC<AttendanceOcrUploadModalProps> =
   const [ocrResult, setOcrResult] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
@@ -223,28 +224,56 @@ export const AttendanceOcrUploadModal: React.FC<AttendanceOcrUploadModalProps> =
           {/* Upload / Picture Drop Zone */}
           {!ocrResult && (
             <div className="space-y-4">
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-700 hover:border-purple-500 rounded-2xl p-6 text-center cursor-pointer bg-slate-900/40 hover:bg-slate-900/80 transition-all"
-              >
+              <div className="border-2 border-dashed border-slate-700 hover:border-purple-500 rounded-2xl p-6 text-center bg-slate-900/40 transition-all">
+                <div className="w-12 h-12 rounded-full bg-purple-950/60 text-purple-400 flex items-center justify-center mx-auto mb-3 border border-purple-800/40">
+                  <Upload className="w-6 h-6" />
+                </div>
+
+                <div className="text-sm font-semibold text-white">
+                  {fileName ? fileName : 'Upload Biometric Attendance Sheet / Picture'}
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1 max-w-md mx-auto">
+                  Select a photo from your gallery/files, or take a direct picture using your camera.
+                </p>
+
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="px-4 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 rounded-xl shadow-md transition-all flex items-center gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Choose from Gallery / Files</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="px-4 py-2 text-xs font-bold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all flex items-center gap-2"
+                  >
+                    <Camera className="w-4 h-4 text-purple-400" />
+                    <span>Take Photo with Camera</span>
+                  </button>
+                </div>
+
+                {/* Standard file input without capture */}
                 <input
-                  ref={fileInputRef}
+                  ref={galleryInputRef}
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
                 />
 
-                <div className="w-12 h-12 rounded-full bg-purple-950/60 text-purple-400 flex items-center justify-center mx-auto mb-3 border border-purple-800/40">
-                  <Upload className="w-6 h-6" />
-                </div>
-
-                <div className="text-sm font-semibold text-white">
-                  {fileName ? fileName : 'Click to Upload Attendance Sheet Picture / Scan'}
-                </div>
-                <p className="text-[11px] text-slate-400 mt-1 max-w-md mx-auto">
-                  Upload high-resolution camera photograph, mobile snapshot, or scanner PDF/JPG of the daily attendance register or biometric clock log.
-                </p>
+                {/* Camera capture input */}
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
 
                 {previewUrl && (
                   <div className="mt-4 max-w-xs mx-auto rounded-lg overflow-hidden border border-slate-700">

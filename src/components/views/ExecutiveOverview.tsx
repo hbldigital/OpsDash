@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Fingerprint,
   Share2,
+  FileText,
 } from 'lucide-react';
 import {
   BarChart,
@@ -49,6 +50,7 @@ export interface ExecutiveOverviewProps {
   onNavigate?: (view: any) => void;
   onNavigateSection?: (section: any) => void;
   onOpenExport?: () => void;
+  onOpenManualReport?: () => void;
 }
 
 export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
@@ -63,6 +65,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   onNavigate: propOnNavigate,
   onNavigateSection,
   onOpenExport,
+  onOpenManualReport,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -296,7 +299,18 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
             </div>
           </div>
 
+          {onOpenManualReport && (
+            <button
+              type="button"
+              onClick={onOpenManualReport}
+              className="px-3.5 py-2 text-xs font-semibold text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-800/60 rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center gap-1.5"
+            >
+              + Add Report Manually
+            </button>
+          )}
+
           <button
+            type="button"
             onClick={() => onNavigate('upload_ocr')}
             className="px-3.5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-sm transition-colors whitespace-nowrap"
           >
@@ -698,7 +712,42 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 font-mono">
-              {paginatedReports.map((r) => (
+              {filteredReports.length === 0 ? (
+                <tr>
+                  <td colSpan={19} className="py-12 px-4 text-center text-slate-400">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-slate-500">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                      <div className="text-sm font-semibold text-white">
+                        No Operational Reports Submitted for {currentDate}
+                      </div>
+                      <div className="text-xs text-slate-400 max-w-md">
+                        Upload a photo of the daily operational sheet via OCR or click "+ Add Report Manually" to begin logging operational progress.
+                      </div>
+                      <div className="flex items-center gap-3 pt-3">
+                        <button
+                          type="button"
+                          onClick={() => onNavigate('upload_ocr')}
+                          className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors"
+                        >
+                          + Upload Report Image (OCR)
+                        </button>
+                        {onOpenManualReport && (
+                          <button
+                            type="button"
+                            onClick={onOpenManualReport}
+                            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors"
+                          >
+                            + Add Report Manually
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                paginatedReports.map((r) => (
                 <tr
                   key={r.id}
                   onClick={() =>
@@ -753,37 +802,39 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   <td className="py-2 px-3 text-right text-amber-400 tabular-nums">{r.pakidDeferred}</td>
                   <td className="py-2 px-3 text-right text-rose-400 tabular-nums">{r.pakidCorrection}</td>
                 </tr>
-              ))}
+              )))}
 
-              {/* FINAL CONSOLIDATED TOTAL ROW */}
-              <tr className="bg-blue-950/40 border-t-2 border-blue-600/60 font-bold text-white text-xs">
-                <td className="py-3 px-3 uppercase text-blue-300">TOTAL</td>
-                <td className="py-3 px-3 font-sans uppercase text-blue-200" colSpan={2}>
-                  CONSOLIDATED ZONE TOTAL ({zoneSummary.reportedOfficesCount} OFFICES)
-                </td>
-                <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.totalEmployees}</td>
-                <td className="py-3 px-3 text-right text-amber-300 tabular-nums">{zoneSummary.lateAfter745}</td>
-                <td className="py-3 px-3 text-right text-rose-300 tabular-nums">{zoneSummary.lateAfter800}</td>
-                <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.qmaticIssued}</td>
-                <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.qmaticProcessed}</td>
-                <td className="py-3 px-3 text-right text-emerald-300 tabular-nums">
-                  {zoneSummary.qmaticPercentage !== null ? `${zoneSummary.qmaticPercentage}%` : 'N/A'}
-                </td>
-                <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.oneAppIssued}</td>
-                <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.oneAppProcessed}</td>
-                <td className="py-3 px-3 text-right text-slate-300 tabular-nums">{zoneSummary.oneAppSkipped}</td>
-                <td className="py-3 px-3 text-right text-emerald-300 tabular-nums">
-                  {zoneSummary.oneAppReconciliationPercentage !== null
-                    ? `${zoneSummary.oneAppReconciliationPercentage}%`
-                    : 'N/A'}
-                </td>
-                <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.approvedOneApp}</td>
-                <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.diminishedFingerprintsMBVS}</td>
-                <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.proofOfLife}</td>
-                <td className="py-3 px-3 text-right text-emerald-300 tabular-nums">{zoneSummary.pakidApproved}</td>
-                <td className="py-3 px-3 text-right text-amber-300 tabular-nums">{zoneSummary.pakidDeferred}</td>
-                <td className="py-3 px-3 text-right text-rose-300 tabular-nums">{zoneSummary.pakidCorrection}</td>
-              </tr>
+              {/* FINAL CONSOLIDATED TOTAL ROW (only when reports exist) */}
+              {filteredReports.length > 0 && (
+                <tr className="bg-blue-950/40 border-t-2 border-blue-600/60 font-bold text-white text-xs">
+                  <td className="py-3 px-3 uppercase text-blue-300">TOTAL</td>
+                  <td className="py-3 px-3 font-sans uppercase text-blue-200" colSpan={2}>
+                    CONSOLIDATED ZONE TOTAL ({zoneSummary.reportedOfficesCount} OFFICES)
+                  </td>
+                  <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.totalEmployees}</td>
+                  <td className="py-3 px-3 text-right text-amber-300 tabular-nums">{zoneSummary.lateAfter745}</td>
+                  <td className="py-3 px-3 text-right text-rose-300 tabular-nums">{zoneSummary.lateAfter800}</td>
+                  <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.qmaticIssued}</td>
+                  <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.qmaticProcessed}</td>
+                  <td className="py-3 px-3 text-right text-emerald-300 tabular-nums">
+                    {zoneSummary.qmaticPercentage !== null ? `${zoneSummary.qmaticPercentage}%` : 'N/A'}
+                  </td>
+                  <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.oneAppIssued}</td>
+                  <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.oneAppProcessed}</td>
+                  <td className="py-3 px-3 text-right text-slate-300 tabular-nums">{zoneSummary.oneAppSkipped}</td>
+                  <td className="py-3 px-3 text-right text-emerald-300 tabular-nums">
+                    {zoneSummary.oneAppReconciliationPercentage !== null
+                      ? `${zoneSummary.oneAppReconciliationPercentage}%`
+                      : 'N/A'}
+                  </td>
+                  <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.approvedOneApp}</td>
+                  <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.diminishedFingerprintsMBVS}</td>
+                  <td className="py-3 px-3 text-right tabular-nums">{zoneSummary.proofOfLife}</td>
+                  <td className="py-3 px-3 text-right text-emerald-300 tabular-nums">{zoneSummary.pakidApproved}</td>
+                  <td className="py-3 px-3 text-right text-amber-300 tabular-nums">{zoneSummary.pakidDeferred}</td>
+                  <td className="py-3 px-3 text-right text-rose-300 tabular-nums">{zoneSummary.pakidCorrection}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

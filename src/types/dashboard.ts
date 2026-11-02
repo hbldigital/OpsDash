@@ -40,14 +40,34 @@ export interface StaffBreakdown {
   totalStaff: number;
 }
 
+export interface LeadershipTenureRecord {
+  id: string;
+  role: 'OIC' | '2IC' | 'OA';
+  roleTitle: string; // e.g. "Office Incharge (OIC)", "Second Incharge (2IC)", "Office Assistant (OA)"
+  name: string;
+  designation: string;
+  grade?: string;
+  tasks?: string;
+  contact?: string;
+  whatsappNumber?: string;
+  startDate: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD or empty
+  isCurrent: boolean;
+  tenureDuration?: string;
+  transferOrderNo?: string;
+  remarks?: string;
+}
+
 export interface Office {
+  id?: string;
   code: string;
   name: string;
+  shift?: 'Morning' | 'Evening' | 'Regular' | string;
   district: string;
   zone?: string;
   zoneName?: string;
   zoneCode?: string;
-  type: 'NRC' | 'DAU' | 'MRV' | 'EXECUTIVE' | 'Executive NRC';
+  type: 'NRC' | 'DAU' | 'MRV' | 'EXECUTIVE' | 'Executive NRC' | 'Executive' | 'NRC Counter' | string;
   isActive: boolean;
   totalCounters: number;
   expectedStaff: number;
@@ -59,13 +79,28 @@ export interface Office {
   incharge?: {
     name: string;
     designation?: string;
+    grade?: string;
+    startDate?: string;
+    contacts: ContactDetail[];
+  };
+  secondIncharge?: {
+    name: string;
+    designation?: string;
+    grade?: string;
+    startDate?: string;
     contacts: ContactDetail[];
   };
   assistant?: {
     name: string;
     designation?: string;
+    grade?: string;
+    responsibilities?: string;
+    mobileNumber?: string;
+    whatsappNumber?: string;
+    startDate?: string;
     contacts: ContactDetail[];
   };
+  leadershipHistory?: LeadershipTenureRecord[];
   staffBreakdown?: StaffBreakdown;
 }
 
