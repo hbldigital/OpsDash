@@ -835,36 +835,29 @@ function saveDatabase(db: ClientDatabase) {
  * this completely intercepts fetch('/api/*') and fulfills it with local persistence.
  */
 export function setupStaticApiFallback() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || !window.fetch) return;
 
-  const originalFetch = window.fetch;
-  const isGitHubPages =
+  const isStaticHost =
     window.location.hostname.includes('github.io') ||
-    window.location.hostname === 'localhost' && window.location.port !== '3000';
+    window.location.hostname.includes('.pages.dev') ||
+    window.location.hostname.includes('.netlify.app') ||
+    window.location.hostname.includes('.vercel.app') ||
+    (window.location.hostname === 'localhost' && window.location.port !== '3000');
 
-  window.fetch = async function (input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  // When running with live Express backend (such as dev server or AI Studio container),
+  // native fetch already communicates directly with the backend.
+  if (!isStaticHost) {
+    return;
+  }
+
+  const originalFetch = window.fetch.bind(window);
+
+  const customFetch = async function (input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
 
     // Only intercept /api/ requests
     if (!url.includes('/api/')) {
       return originalFetch(input, init);
-    }
-
-    // If on Node dev server (not GitHub pages), try original fetch first!
-    if (!isGitHubPages) {
-      try {
-        const response = await originalFetch(input, init);
-        // If the server answered properly, return it!
-        if (response.ok || response.status === 400 || response.status === 401 || response.status === 403) {
-          const clone = response.clone();
-          const contentType = clone.headers.get('content-type') || '';
-          if (contentType.includes('application/json')) {
-            return response;
-          }
-        }
-      } catch (networkErr) {
-        // Server unreachable or network error, fallback to client-side database
-      }
     }
 
     // --- CLIENT-SIDE LOCALSTORAGE API FALLBACK ---
@@ -1245,4 +1238,18 @@ export function setupStaticApiFallback() {
     // Default 200 response for any unhandled /api route
     return makeJsonResponse({ success: true });
   };
+
+  try {
+    Object.defineProperty(window, 'fetch', {
+      value: customFetch,
+      writable: true,
+      configurable: true,
+    });
+  } catch {
+    try {
+      (window as any).fetch = customFetch;
+    } catch (e2) {
+      console.warn('Unable to intercept window.fetch:', e2);
+    }
+  }
 }

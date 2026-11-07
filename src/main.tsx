@@ -4,7 +4,11 @@ import './index.css';
 import { setupStaticApiFallback } from './utils/staticApiFallback';
 
 // Initialize offline / static hosting API support for environments like GitHub Pages
-setupStaticApiFallback();
+try {
+  setupStaticApiFallback();
+} catch (e) {
+  console.warn('Fallback initialization notice:', e);
+}
 
 createRoot(document.getElementById('root')!).render(<App />);
 
