@@ -126,6 +126,7 @@ export interface OfficeDailyReport {
   zone: string;
   officeCode: string;
   officeName: string;
+  shift?: string;
   reportingStatus: 'REPORTED' | 'PENDING' | 'CORRECTED';
   submissionTime?: string;
   submittedBy?: string;

@@ -268,13 +268,16 @@ apiRouter.get('/dashboard/executive', (req: Request, res: Response) => {
       prevDayApprovedOneApp: r.previousDayApproved ?? r.prevDayApprovedOneApp ?? 0,
     });
 
-    const report = reports.find(r => r.officeCode.toUpperCase() === office.code.toUpperCase());
+    const report = reports.find(
+      (r: any) => r.officeCode.toUpperCase() === office.code.toUpperCase() &&
+           ((r.shift && office.shift) ? r.shift.toLowerCase() === office.shift.toLowerCase() : true)
+    );
     if (report) {
       return formattedReport(report);
     }
-    // Return pending office placeholder
+    // Return pending office placeholder with unique ID
     return formattedReport({
-      id: `pending-${date}-${office.code}`,
+      id: `pending-${date}-${office.id || `${office.code}-${office.shift || 'shift'}`}`,
       date,
       reportingDate: date,
       zone: office.zone,

@@ -124,6 +124,7 @@ export interface DailyReport {
   id: string;
   reportingDate: string;
   date?: string;
+  shift?: string;
   zone?: string;
   zoneCode: string;
   officeCode: string;
