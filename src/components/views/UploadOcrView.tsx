@@ -81,6 +81,15 @@ export const UploadOcrView: React.FC<UploadOcrViewProps> = ({
     }
   };
 
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
   // Run OCR on uploaded file
   const handleRunOcr = async () => {
     if (!selectedFile) return;
@@ -88,24 +97,30 @@ export const UploadOcrView: React.FC<UploadOcrViewProps> = ({
     setIsProcessing(true);
     setErrorMsg(null);
 
-    const formData = new FormData();
-    formData.append('image', selectedFile);
-    formData.append('reportingDate', reportingDate);
-
     try {
+      const base64Data = await readFileAsBase64(selectedFile);
+
       const res = await fetch('/api/ocr/upload', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageBase64: base64Data,
+          mimeType: selectedFile.type || 'image/jpeg',
+          fileName: selectedFile.name,
+          reportingDate,
+        }),
       });
 
       if (!res.ok) {
-        throw new Error((await res.json()).error || 'Failed to extract data');
+        const errorJson = await res.json().catch(() => ({}));
+        throw new Error(errorJson.error || 'Failed to extract data from image');
       }
 
       const data = await res.json();
       setOcrResult(data);
-      setEditableRows(data.rows);
+      setEditableRows(data.rows || []);
     } catch (err: any) {
+      console.error('OCR Processing error:', err);
       setErrorMsg(err.message || 'OCR extraction failed');
     } finally {
       setIsProcessing(false);

@@ -178,6 +178,48 @@ apiRouter.delete('/attendance/:id', (req: Request, res: Response) => {
   res.json({ success: ok });
 });
 
+// ----------------------------------------------------
+// 2.6 Employee Profiles (HR Dossier)
+// ----------------------------------------------------
+apiRouter.get('/employees', (req: Request, res: Response) => {
+  const officeCode = (req.query.officeCode as string) || undefined;
+  const employees = db.getEmployees(officeCode);
+  res.json({ success: true, employees, count: employees.length });
+});
+
+apiRouter.get('/employees/:id', (req: Request, res: Response) => {
+  const emp = db.getEmployeeById(req.params.id);
+  if (!emp) {
+    res.status(404).json({ success: false, error: 'Employee not found' });
+    return;
+  }
+  res.json({ success: true, employee: emp });
+});
+
+apiRouter.post('/employees', (req: Request, res: Response) => {
+  const actor = getActingUser(req);
+  const data = req.body;
+  if (!data.name || !data.erpNumber) {
+    res.status(400).json({ success: false, error: 'Name and ERP/NS number are required' });
+    return;
+  }
+  const saved = db.saveEmployee(data, actor);
+  res.json({ success: true, employee: saved });
+});
+
+apiRouter.put('/employees/:id', (req: Request, res: Response) => {
+  const actor = getActingUser(req);
+  const data = { ...req.body, id: req.params.id };
+  const saved = db.saveEmployee(data, actor);
+  res.json({ success: true, employee: saved });
+});
+
+apiRouter.delete('/employees/:id', (req: Request, res: Response) => {
+  const actor = getActingUser(req);
+  const ok = db.deleteEmployee(req.params.id, actor);
+  res.json({ success: ok });
+});
+
 apiRouter.post('/attendance/batch-import', (req: Request, res: Response) => {
   const actor = getActingUser(req);
   const { records, sourceTitle } = req.body;

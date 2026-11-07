@@ -46,7 +46,7 @@ export const OfficeEditModal: React.FC<OfficeEditModalProps> = ({
   const initialCode = office.code;
   const initialId = office.id || office.code;
 
-  const [activeTab, setActiveTab] = useState<'details' | 'incharge' | 'assistant' | 'tenure' | 'staff'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'incharge' | 'assistant' | 'tenure' | 'staff' | 'infrastructure'>('details');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -205,6 +205,29 @@ export const OfficeEditModal: React.FC<OfficeEditModalProps> = ({
     setIsSaving(true);
     setSaveError(null);
 
+    const isUc =
+      formData.type === 'UC' ||
+      (formData.name || '').toUpperCase().startsWith('UC') ||
+      (formData.name || '').toUpperCase().includes('UNION COUNCIL');
+
+    if (isUc) {
+      if (Number(staff.officialsMale) > 1) {
+        setSaveError('UC Policy Violation: Maximum 1 DEO is allowed at Union Councils.');
+        setIsSaving(false);
+        return;
+      }
+      if (
+        Number(staff.officersFemale) > 0 ||
+        Number(staff.officialsFemale) > 0 ||
+        Number(staff.supportingFemale) > 0 ||
+        Number(staff.outsourceFemale) > 0
+      ) {
+        setSaveError('UC Policy Violation: Female staff is strictly not allowed at Union Council offices (Males only).');
+        setIsSaving(false);
+        return;
+      }
+    }
+
     try {
       const updated: Office = {
         ...formData,
@@ -220,32 +243,59 @@ export const OfficeEditModal: React.FC<OfficeEditModalProps> = ({
           startDate: formData.incharge?.startDate || '2023-08-15',
           contacts: inchargeContacts,
         },
-        secondIncharge: {
-          name: formData.secondIncharge?.name || '',
-          designation: formData.secondIncharge?.designation || 'Assistant Incharge',
-          grade: formData.secondIncharge?.grade || 'BPS-16',
-          startDate: formData.secondIncharge?.startDate || '2024-01-10',
-          contacts: secondInchargeContacts,
-        },
-        assistant: {
-          name: oaName.trim(),
-          designation: oaDesignation.trim(),
-          grade: oaGrade.trim(),
-          responsibilities: oaResponsibilities.trim(),
-          mobileNumber: oaMobileNumber.trim(),
-          whatsappNumber: oaWhatsappNumber.trim(),
-          startDate: oaStartDate,
-          contacts: [
-            { id: 'oa-wa', label: 'WhatsApp Direct', number: oaWhatsappNumber, type: 'whatsapp' },
-            { id: 'oa-call', label: 'Official Mobile', number: oaMobileNumber, type: 'call' },
-          ],
-        },
+        secondIncharge: isUc
+          ? undefined
+          : {
+              name: formData.secondIncharge?.name || '',
+              designation: formData.secondIncharge?.designation || 'Assistant Incharge',
+              grade: formData.secondIncharge?.grade || 'BPS-16',
+              startDate: formData.secondIncharge?.startDate || '2024-01-10',
+              contacts: secondInchargeContacts,
+            },
+        assistant: isUc
+          ? undefined
+          : {
+              name: oaName.trim(),
+              designation: oaDesignation.trim(),
+              grade: oaGrade.trim(),
+              responsibilities: oaResponsibilities.trim(),
+              mobileNumber: oaMobileNumber.trim(),
+              whatsappNumber: oaWhatsappNumber.trim(),
+              startDate: oaStartDate,
+              contacts: [
+                { id: 'oa-wa', label: 'WhatsApp Direct', number: oaWhatsappNumber, type: 'whatsapp' },
+                { id: 'oa-call', label: 'Official Mobile', number: oaMobileNumber, type: 'call' },
+              ],
+            },
         leadershipHistory: historyRecords,
         staffBreakdown: {
           ...staff,
           totalStaff: totalStaffCalculated,
         },
         expectedStaff: totalStaffCalculated,
+        buildingStatus: formData.buildingStatus || 'Gratis',
+        monthlyRentPKR: Number(formData.monthlyRentPKR) || 0,
+        operationalDate: formData.operationalDate || '',
+        currentBuildingOperationalDate: formData.currentBuildingOperationalDate || '',
+        shiftsCount: Number(formData.shiftsCount) || (isUc ? 1 : 2),
+        coveredAreaSqFt: Number(formData.coveredAreaSqFt) || 1200,
+        buildingCondition: formData.buildingCondition || 'Good',
+        loadSheddingHours: Number(formData.loadSheddingHours) || 1,
+        loadSheddingMinutes: Number(formData.loadSheddingMinutes) || 30,
+        generatorKVA: formData.generatorKVA || '15 KVA',
+        upsKVA: formData.upsKVA || '3 KVA',
+        fleetCardStatus: formData.fleetCardStatus || 'Available',
+        fleetCardLastDigits: formData.fleetCardLastDigits || '8421',
+        fleetCardReceiveDate: formData.fleetCardReceiveDate || '2024-01-10',
+        fleetCardUnavailableReason: formData.fleetCardUnavailableReason || '',
+        publicFacilities: formData.publicFacilities || ['Fresh Water', 'Air Conditioning'],
+        parkingType: formData.parkingType || 'Outside parking',
+        authorizedOfficers: Number(formData.authorizedOfficers) || (isUc ? 1 : 2),
+        heldOfficers: Number(formData.heldOfficers) || (isUc ? 1 : 2),
+        authorizedOfficials: Number(formData.authorizedOfficials) || (isUc ? 1 : 6),
+        heldOfficials: Number(formData.heldOfficials) || (isUc ? 1 : 5),
+        authorizedSupportive: Number(formData.authorizedSupportive) || (isUc ? 1 : 2),
+        heldSupportive: Number(formData.heldSupportive) || (isUc ? 1 : 2),
       };
 
       await onSave(updated, initialId || initialCode);
@@ -367,6 +417,17 @@ export const OfficeEditModal: React.FC<OfficeEditModalProps> = ({
             }`}
           >
             5. Staff Breakdown ({totalStaffCalculated})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('infrastructure')}
+            className={`px-3 py-2 font-semibold rounded-t-lg transition-colors border-b-2 whitespace-nowrap ${
+              activeTab === 'infrastructure'
+                ? 'text-emerald-400 border-emerald-400 bg-slate-900/60'
+                : 'text-slate-400 border-transparent hover:text-slate-200'
+            }`}
+          >
+            6. Building &amp; Infrastructure
           </button>
         </div>
 
@@ -1334,6 +1395,238 @@ export const OfficeEditModal: React.FC<OfficeEditModalProps> = ({
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: Building & Infrastructure (User Requirement 7) */}
+          {activeTab === 'infrastructure' && (
+            <div className="space-y-4">
+              {/* Building Status & Details */}
+              <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-4">
+                <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Building2 className="w-4 h-4" />
+                  Building Infrastructure &amp; Operational Setup
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Building Status</label>
+                    <select
+                      value={formData.buildingStatus || 'Gratis'}
+                      onChange={(e) => setFormData({ ...formData, buildingStatus: e.target.value as any })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-medium"
+                    >
+                      <option value="Gratis">Gratis (Free / Government Provided)</option>
+                      <option value="Rented">Rented Building</option>
+                      <option value="NADRA Owned">NADRA Owned Building</option>
+                    </select>
+                  </div>
+
+                  {formData.buildingStatus === 'Rented' && (
+                    <div>
+                      <label className="block text-amber-300 font-semibold mb-1">Monthly Rent (PKR)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="e.g. 45000"
+                        value={formData.monthlyRentPKR || ''}
+                        onChange={(e) => setFormData({ ...formData, monthlyRentPKR: Number(e.target.value) })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-amber-600 rounded-lg text-white font-mono"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Operational Date</label>
+                    <input
+                      type="date"
+                      value={formData.operationalDate || '2018-05-15'}
+                      onChange={(e) => setFormData({ ...formData, operationalDate: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Current Building Date</label>
+                    <input
+                      type="date"
+                      value={formData.currentBuildingOperationalDate || '2021-11-01'}
+                      onChange={(e) => setFormData({ ...formData, currentBuildingOperationalDate: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Working Shifts</label>
+                    <select
+                      value={formData.shiftsCount || 1}
+                      onChange={(e) => setFormData({ ...formData, shiftsCount: Number(e.target.value) })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    >
+                      <option value={1}>1 Shift (General / Regular)</option>
+                      <option value={2}>2 Shifts (Morning &amp; Evening)</option>
+                      <option value={3}>3 Shifts (Round the Clock / 24-7)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Covered Area (Sq. Ft.)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={formData.coveredAreaSqFt || 1200}
+                      onChange={(e) => setFormData({ ...formData, coveredAreaSqFt: Number(e.target.value) })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Building Condition</label>
+                    <select
+                      value={formData.buildingCondition || 'Good'}
+                      onChange={(e) => setFormData({ ...formData, buildingCondition: e.target.value as any })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    >
+                      <option value="Excellent">Excellent</option>
+                      <option value="Good">Good</option>
+                      <option value="Satisfactory">Satisfactory</option>
+                      <option value="Poor">Poor</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Power & Utilities */}
+              <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-4">
+                <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Clock className="w-4 h-4" />
+                  Power Backup, Load Shedding &amp; Fleet Logistics
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Load Shedding Duration</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="24"
+                        placeholder="Hours"
+                        value={formData.loadSheddingHours ?? 1}
+                        onChange={(e) => setFormData({ ...formData, loadSheddingHours: Number(e.target.value) })}
+                        className="w-1/2 px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-mono"
+                      />
+                      <span className="text-slate-400">Hrs</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="59"
+                        placeholder="Minutes"
+                        value={formData.loadSheddingMinutes ?? 30}
+                        onChange={(e) => setFormData({ ...formData, loadSheddingMinutes: Number(e.target.value) })}
+                        className="w-1/2 px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-mono"
+                      />
+                      <span className="text-slate-400">Mins</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Generator Capacity</label>
+                    <select
+                      value={formData.generatorKVA || '15 KVA'}
+                      onChange={(e) => setFormData({ ...formData, generatorKVA: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-medium"
+                    >
+                      <option value="None">None</option>
+                      <option value="5 KVA">5 KVA</option>
+                      <option value="15 KVA">15 KVA</option>
+                      <option value="25 KVA">25 KVA</option>
+                      <option value="50 KVA">50 KVA</option>
+                      <option value="100 KVA">100 KVA</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">UPS Rating</label>
+                    <select
+                      value={formData.upsKVA || '3 KVA'}
+                      onChange={(e) => setFormData({ ...formData, upsKVA: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-medium"
+                    >
+                      <option value="None">None</option>
+                      <option value="1 KVA">1 KVA</option>
+                      <option value="1.2 KVA">1.2 KVA</option>
+                      <option value="2 KVA">2 KVA</option>
+                      <option value="3 KVA">3 KVA</option>
+                      <option value="5 KVA">5 KVA</option>
+                      <option value="6 KVA">6 KVA</option>
+                      <option value="10 KVA">10 KVA</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Fleet Card Availability</label>
+                    <select
+                      value={formData.fleetCardStatus || 'Available'}
+                      onChange={(e) => setFormData({ ...formData, fleetCardStatus: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    >
+                      <option value="Available">Available</option>
+                      <option value="Not Available">Not Available</option>
+                    </select>
+                  </div>
+
+                  {formData.fleetCardStatus === 'Available' ? (
+                    <>
+                      <div>
+                        <label className="block text-slate-400 font-semibold mb-1">Card Last Digits</label>
+                        <input
+                          type="text"
+                          maxLength={4}
+                          placeholder="e.g. 8421"
+                          value={formData.fleetCardLastDigits || '8421'}
+                          onChange={(e) => setFormData({ ...formData, fleetCardLastDigits: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-slate-400 font-semibold mb-1">Receive Date</label>
+                        <input
+                          type="date"
+                          value={formData.fleetCardReceiveDate || '2024-01-10'}
+                          onChange={(e) => setFormData({ ...formData, fleetCardReceiveDate: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-mono"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="sm:col-span-2">
+                      <label className="block text-rose-400 font-semibold mb-1">Reason for Unavailability</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Under allocation / Pending dispatch"
+                        value={formData.fleetCardUnavailableReason || ''}
+                        onChange={(e) => setFormData({ ...formData, fleetCardUnavailableReason: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-rose-800 rounded-lg text-white"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-slate-400 font-semibold mb-1">Parking Options</label>
+                    <select
+                      value={formData.parkingType || 'Outside parking'}
+                      onChange={(e) => setFormData({ ...formData, parkingType: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    >
+                      <option value="Outside parking">Outside parking</option>
+                      <option value="Road area parking">Road area parking</option>
+                      <option value="Inside parking">Inside parking</option>
+                      <option value="Private parking">Private parking</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
           )}

@@ -14,7 +14,9 @@ import {
   AppSettings,
   EmployeeAttendanceRecord,
   LeadershipTenureRecord,
+  EmployeeProfile,
 } from '../src/types/dashboard';
+import { INITIAL_EMPLOYEES } from '../src/utils/initialEmployees';
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const DB_FILE = path.resolve(DATA_DIR, 'nadra_operational_db.json');
@@ -27,6 +29,7 @@ export interface DatabaseState {
   auditLogs: AuditLogEntry[];
   settings: AppSettings;
   attendanceRecords: EmployeeAttendanceRecord[];
+  employees: EmployeeProfile[];
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -1039,9 +1042,10 @@ class DatabaseService {
           ...(loadedState.settings || {}),
         },
         attendanceRecords: loadedState.attendanceRecords || [],
+        employees: loadedState.employees && loadedState.employees.length ? loadedState.employees : [...INITIAL_EMPLOYEES],
       };
 
-      if (hasOldCodes) {
+      if (hasOldCodes || !loadedState.employees) {
         this.saveStateToDisk(state);
       }
       return state;
@@ -1053,6 +1057,7 @@ class DatabaseService {
       offices: [...INITIAL_OFFICES],
       dailyReports: [],
       dataQualityIssues: [],
+      employees: [...INITIAL_EMPLOYEES],
       auditLogs: [
         {
           id: `log-init-${Date.now()}`,
@@ -1632,6 +1637,92 @@ class DatabaseService {
     });
     this.persist();
     return this.state.settings;
+  }
+
+  // --- Employee Profiles & HR Dossiers ---
+  public getEmployees(officeCode?: string): EmployeeProfile[] {
+    if (!this.state.employees) this.state.employees = [...INITIAL_EMPLOYEES];
+    if (officeCode && officeCode !== 'ALL') {
+      return this.state.employees.filter(
+        (e) => e.officeCode.toUpperCase() === officeCode.toUpperCase()
+      );
+    }
+    return this.state.employees;
+  }
+
+  public getEmployeeById(id: string): EmployeeProfile | null {
+    if (!this.state.employees) this.state.employees = [...INITIAL_EMPLOYEES];
+    return (
+      this.state.employees.find(
+        (e) => e.id === id || e.erpNumber.toLowerCase() === id.toLowerCase()
+      ) || null
+    );
+  }
+
+  public saveEmployee(
+    employee: EmployeeProfile,
+    actor?: { id: string; name: string; role: any }
+  ): EmployeeProfile {
+    if (!this.state.employees) this.state.employees = [...INITIAL_EMPLOYEES];
+    const idx = this.state.employees.findIndex(
+      (e) => e.id === employee.id || e.erpNumber === employee.erpNumber
+    );
+
+    if (idx >= 0) {
+      this.state.employees[idx] = { ...this.state.employees[idx], ...employee };
+      if (actor) {
+        this.addAuditLog({
+          userId: actor.id,
+          userName: actor.name,
+          userRole: actor.role,
+          action: 'EDIT_RECORD',
+          details: `Updated employee profile for [${employee.name}] (${employee.erpNumber}) - ${employee.designation}`,
+        });
+      }
+    } else {
+      const created: EmployeeProfile = {
+        ...employee,
+        id: employee.id || `emp-${Date.now()}`,
+      };
+      this.state.employees.push(created);
+      if (actor) {
+        this.addAuditLog({
+          userId: actor.id,
+          userName: actor.name,
+          userRole: actor.role,
+          action: 'ADD_RECORD',
+          details: `Created new employee dossier for [${employee.name}] (${employee.erpNumber})`,
+        });
+      }
+    }
+
+    this.persist();
+    return employee;
+  }
+
+  public deleteEmployee(
+    id: string,
+    actor?: { id: string; name: string; role: any }
+  ): boolean {
+    if (!this.state.employees) return false;
+    const initialLen = this.state.employees.length;
+    this.state.employees = this.state.employees.filter(
+      (e) => e.id !== id && e.erpNumber !== id
+    );
+    const deleted = this.state.employees.length < initialLen;
+    if (deleted) {
+      if (actor) {
+        this.addAuditLog({
+          userId: actor.id,
+          userName: actor.name,
+          userRole: actor.role,
+          action: 'DELETE_RECORD',
+          details: `Removed employee dossier ID: ${id}`,
+        });
+      }
+      this.persist();
+    }
+    return deleted;
   }
 }
 

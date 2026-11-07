@@ -30,6 +30,8 @@ import { OfficeProfileModal } from './components/modals/OfficeProfileModal';
 import { OfficeEditModal } from './components/modals/OfficeEditModal';
 import { AddOfficeModal } from './components/modals/AddOfficeModal';
 import { DailyReportManualEntryModal } from './components/modals/DailyReportManualEntryModal';
+import { EmployeeProfileModal } from './components/modals/EmployeeProfileModal';
+import { LoginView } from './components/auth/LoginView';
 import { LocalizationProvider, useLocalization } from './context/LocalizationContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -39,6 +41,7 @@ import {
   ZoneSummary,
   User,
   NavView,
+  EmployeeProfile,
 } from './types';
 
 function AppContent() {
@@ -74,6 +77,24 @@ function AppContent() {
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Employee Profile Modal State (User Requirement 8)
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeProfile | null>(null);
+  const [isEmployeeProfileOpen, setIsEmployeeProfileOpen] = useState(false);
+  const [employees, setEmployees] = useState<EmployeeProfile[]>([]);
+
+  // Load Employees Directory
+  const loadEmployees = useCallback(async () => {
+    try {
+      const res = await fetch('/api/employees');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.employees)) {
+        setEmployees(data.employees);
+      }
+    } catch (err) {
+      console.error('Failed to load employees:', err);
+    }
+  }, []);
 
   // Load Executive Dashboard Data
   const loadDashboardData = useCallback(async (date: string) => {
@@ -115,7 +136,7 @@ function AppContent() {
     }
   }, []);
 
-  // Load Users
+  // Load Users & Auth Session
   const loadUsers = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/users');
@@ -132,7 +153,16 @@ function AppContent() {
           isActive: true,
         }));
         setUsers(mappedUsers);
-        setCurrentUser(mappedUsers[0]);
+        const saved = localStorage.getItem('nadra_zone_d_auth_session');
+        if (saved) {
+          try {
+            setCurrentUser(JSON.parse(saved));
+          } catch {
+            setCurrentUser(mappedUsers[0]);
+          }
+        } else {
+          setCurrentUser(mappedUsers[0]);
+        }
       }
     } catch (err) {
       console.error('Failed to load users:', err);
@@ -185,11 +215,12 @@ function AppContent() {
       loadPrevDayData(),
       loadOffices(),
       loadUsers(),
+      loadEmployees(),
       loadHistory(),
       loadDataQualityCount(),
     ]);
     setIsLoading(false);
-  }, [loadDashboardData, loadPrevDayData, loadOffices, loadUsers, loadHistory, loadDataQualityCount]);
+  }, [loadDashboardData, loadPrevDayData, loadOffices, loadUsers, loadEmployees, loadHistory, loadDataQualityCount]);
 
   useEffect(() => {
     loadAll(currentDate);
@@ -204,6 +235,87 @@ function AppContent() {
     const user = users.find((u) => u.id === userId);
     if (user) {
       setCurrentUser(user);
+      localStorage.setItem('nadra_zone_d_auth_session', JSON.stringify(user));
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('nadra_zone_d_auth_session');
+    setCurrentUser(null);
+  };
+
+  const handleOpenEmployeeProfile = (empOrId: EmployeeProfile | string) => {
+    if (typeof empOrId === 'object' && empOrId !== null) {
+      setSelectedEmployee(empOrId);
+      setIsEmployeeProfileOpen(true);
+      return;
+    }
+    const found = employees.find(
+      (e) =>
+        e.id === empOrId ||
+        e.erpNumber === empOrId ||
+        e.name.toLowerCase() === (empOrId as string).toLowerCase()
+    );
+    if (found) {
+      setSelectedEmployee(found);
+    } else {
+      setSelectedEmployee({
+        id: empOrId,
+        erpNumber: empOrId,
+        name: empOrId,
+        fatherName: '—',
+        cnic: '43203-0000000-1',
+        designation: 'Registration Executive',
+        department: 'Operations',
+        workingSeat: 'Counter Operations',
+        dateOfAppointment: '2020-01-01',
+        dateOfPostingCurrentLocation: '2023-01-01',
+        passportStatus: 'No',
+        jobType: 'Permanent',
+        bpsGrade: 'BPS-16',
+        contactNumber: '0300-0000000',
+        whatsappNumber: '0300-0000000',
+        permanentAddress: 'Larkana, Sindh',
+        currentAddress: 'Larkana, Sindh',
+        domicileDistrict: 'Larkana',
+        domicileProvince: 'Sindh',
+        dateOfBirth: '1992-05-15',
+        gender: 'Male',
+        religion: 'Islam',
+        maritalStatus: 'Married',
+        disability: 'None',
+        qualificationLevel: 'Graduation / Bachelors (14/16 Years)',
+        postingHistory: [],
+        punctualityScore: 92,
+        punctualityRank: 'A',
+      });
+    }
+    setIsEmployeeProfileOpen(true);
+  };
+
+  const handleSaveEmployee = async (updated: EmployeeProfile) => {
+    try {
+      const res = await fetch(`/api/employees/${encodeURIComponent(updated.id)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': currentUser?.id || 'u-1',
+        },
+        body: JSON.stringify(updated),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEmployees((prev) =>
+          prev.map((e) =>
+            e.id === updated.id || e.erpNumber === updated.erpNumber
+              ? data.employee || updated
+              : e
+          )
+        );
+        setSelectedEmployee(data.employee || updated);
+      }
+    } catch (err) {
+      console.error('Failed to update employee:', err);
     }
   };
 
@@ -388,6 +500,18 @@ function AppContent() {
     return dailyReports.find((r) => r.officeCode.toUpperCase() === selectedOfficeProfileCode.toUpperCase()) || null;
   }, [dailyReports, selectedOfficeProfileCode]);
 
+  if (!currentUser && !isLoading) {
+    return (
+      <LoginView
+        users={users}
+        onLoginSuccess={(u) => {
+          setCurrentUser(u);
+          localStorage.setItem('nadra_zone_d_auth_session', JSON.stringify(u));
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#070e18] text-slate-100 flex flex-col font-sans">
       {/* Main Header */}
@@ -399,6 +523,7 @@ function AppContent() {
         currentUser={currentUser}
         availableUsers={users}
         onSwitchUser={handleSwitchUser}
+        onLogout={handleLogout}
         lastUpdated="Just now"
         onPrint={handlePrint}
         onToggleMobileMenu={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
@@ -468,6 +593,7 @@ function AppContent() {
                     offices={offices}
                     onSelectOffice={handleSelectOffice}
                     onSelectOfficeProfile={handleSelectOfficeProfile}
+                    onSelectEmployee={handleOpenEmployeeProfile}
                   />
                 )}
 
@@ -647,6 +773,14 @@ function AppContent() {
           onSaveCorrection={handleSaveCorrection}
         />
       )}
+
+      {/* Employee Profile Modal (User Requirement 8) */}
+      <EmployeeProfileModal
+        isOpen={isEmployeeProfileOpen}
+        onClose={() => setIsEmployeeProfileOpen(false)}
+        employee={selectedEmployee}
+        onSave={handleSaveEmployee}
+      />
 
       {/* Export Modal */}
       {zoneSummary && (

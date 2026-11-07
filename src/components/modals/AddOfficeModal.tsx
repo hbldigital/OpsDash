@@ -129,6 +129,29 @@ export const AddOfficeModal: React.FC<AddOfficeModalProps> = ({
     setIsSaving(true);
     setError(null);
 
+    const isUc =
+      type === 'UC' ||
+      name.trim().toUpperCase().startsWith('UC') ||
+      name.trim().toUpperCase().includes('UNION COUNCIL');
+
+    if (isUc) {
+      if (Number(staff.officialsMale) > 1) {
+        setError('UC Policy Violation: Maximum 1 DEO is allowed at Union Councils.');
+        setIsSaving(false);
+        return;
+      }
+      if (
+        Number(staff.officersFemale) > 0 ||
+        Number(staff.officialsFemale) > 0 ||
+        Number(staff.supportingFemale) > 0 ||
+        Number(staff.outsourceFemale) > 0
+      ) {
+        setError('UC Policy Violation: Female staff is strictly not allowed at Union Council offices (Males only).');
+        setIsSaving(false);
+        return;
+      }
+    }
+
     try {
       const cleanCode = code.trim().toUpperCase();
       const newOffice: Office = {
@@ -141,8 +164,8 @@ export const AddOfficeModal: React.FC<AddOfficeModalProps> = ({
         zoneCode: zoneCode.trim() || 'Z050D',
         type,
         isActive: true,
-        totalCounters: Number(totalCounters) || 2,
-        dailyCapacity: Number(dailyCapacity) || 150,
+        totalCounters: Number(totalCounters) || (isUc ? 1 : 2),
+        dailyCapacity: Number(dailyCapacity) || (isUc ? 80 : 150),
         expectedStaff: totalStaffCalculated,
         address: address.trim(),
         landline: landline.trim(),
@@ -150,26 +173,51 @@ export const AddOfficeModal: React.FC<AddOfficeModalProps> = ({
         longitude: longitude === '' ? undefined : Number(longitude),
         incharge: {
           name: inchargeName.trim() || 'Incharge Officer',
-          designation: inchargeDesignation.trim() || 'Center Incharge',
-          grade: 'BPS-17',
+          designation: inchargeDesignation.trim() || (isUc ? 'Counter Incharge' : 'Center Incharge'),
+          grade: isUc ? 'BPS-14' : 'BPS-17',
           startDate: new Date().toISOString().split('T')[0],
           contacts: inchargeContacts.filter((c) => c.number.trim().length > 0),
         },
-        assistant: {
-          name: assistantName.trim() || 'Office Assistant',
-          designation: assistantDesignation.trim() || 'Office Assistant (OA)',
-          grade: 'BPS-14',
-          responsibilities: 'Token management, front-desk coordination, daily reconciliation registers.',
-          mobileNumber: assistantContacts[0]?.number || '',
-          whatsappNumber: assistantContacts[0]?.number || '',
-          startDate: new Date().toISOString().split('T')[0],
-          contacts: assistantContacts.filter((c) => c.number.trim().length > 0),
-        },
+        secondIncharge: undefined,
+        assistant: isUc
+          ? undefined
+          : {
+              name: assistantName.trim() || 'Office Assistant',
+              designation: assistantDesignation.trim() || 'Office Assistant (OA)',
+              grade: 'BPS-14',
+              responsibilities: 'Token management, front-desk coordination, daily reconciliation registers.',
+              mobileNumber: assistantContacts[0]?.number || '',
+              whatsappNumber: assistantContacts[0]?.number || '',
+              startDate: new Date().toISOString().split('T')[0],
+              contacts: assistantContacts.filter((c) => c.number.trim().length > 0),
+            },
         leadershipHistory: [],
         staffBreakdown: {
           ...staff,
           totalStaff: totalStaffCalculated,
         },
+        buildingStatus: 'Gratis',
+        monthlyRentPKR: 0,
+        operationalDate: new Date().toISOString().split('T')[0],
+        currentBuildingOperationalDate: new Date().toISOString().split('T')[0],
+        shiftsCount: 1,
+        coveredAreaSqFt: isUc ? 600 : 1200,
+        buildingCondition: 'Good',
+        loadSheddingHours: 1,
+        loadSheddingMinutes: 30,
+        generatorKVA: isUc ? '5 KVA' : '15 KVA',
+        upsKVA: '2 KVA',
+        fleetCardStatus: 'Available',
+        fleetCardLastDigits: '8421',
+        fleetCardReceiveDate: new Date().toISOString().split('T')[0],
+        publicFacilities: ['Fresh Water', 'Air Conditioning'],
+        parkingType: 'Outside parking',
+        authorizedOfficers: isUc ? 1 : 2,
+        heldOfficers: isUc ? 1 : 2,
+        authorizedOfficials: isUc ? 1 : 4,
+        heldOfficials: isUc ? 1 : 4,
+        authorizedSupportive: isUc ? 1 : 2,
+        heldSupportive: isUc ? 1 : 2,
       };
 
       await onAddOffice(newOffice);

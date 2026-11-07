@@ -34,6 +34,7 @@ interface HeaderProps {
   onPrint?: () => void;
   onToggleMobileMenu?: () => void;
   onOpenSettings?: () => void;
+  onLogout?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -46,6 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
   onPrint,
   onToggleMobileMenu,
   onOpenSettings,
+  onLogout,
 }) => {
   const { getText, zoneName, zoneCode } = useLocalization();
   const { theme, toggleTheme, isDark } = useTheme();
@@ -208,6 +210,20 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <Sliders className="w-3.5 h-3.5" />
                       <span>Custom Labels &amp; Shift Timings</span>
+                    </button>
+                  </div>
+                )}
+
+                {onLogout && (
+                  <div className="pt-1 mt-1 border-t border-slate-800">
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        onLogout();
+                      }}
+                      className="w-full px-3 py-2 text-left flex items-center gap-2 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 font-semibold"
+                    >
+                      <span>Sign Out (Lock Session)</span>
                     </button>
                   </div>
                 )}

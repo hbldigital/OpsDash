@@ -120,12 +120,15 @@ Return ONLY a valid JSON object matching the requested schema.
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
-        contents: {
-          parts: [
-            { inlineData: { mimeType: safeMime, data: imageBuf.toString('base64') } },
-            { text: prompt },
-          ],
-        },
+        contents: [
+          {
+            inlineData: {
+              mimeType: safeMime,
+              data: imageBuf.toString('base64'),
+            },
+          },
+          prompt,
+        ],
         config: {
           responseMimeType: 'application/json',
           responseSchema: {
@@ -444,12 +447,15 @@ Return valid JSON with detectedDate, detectedOfficeCode, and an array of records
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
-        contents: {
-          parts: [
-            { inlineData: { mimeType: safeMime, data: imageBuf.toString('base64') } },
-            { text: prompt },
-          ],
-        },
+        contents: [
+          {
+            inlineData: {
+              mimeType: safeMime,
+              data: imageBuf.toString('base64'),
+            },
+          },
+          prompt,
+        ],
         config: {
           responseMimeType: 'application/json',
           responseSchema: {

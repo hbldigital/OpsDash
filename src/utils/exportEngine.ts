@@ -14,6 +14,8 @@ export interface ExportOptions {
   zoneCode?: string;
   date?: string;
   theme?: 'light' | 'dark';
+  forceDesktopView?: boolean;
+  desktopWidth?: number;
 }
 
 /**
@@ -85,8 +87,12 @@ function normalizeCssColor(colorStr: string): string {
 async function captureElementToCanvas(
   target: HTMLElement,
   bgColor: string,
-  scale: number = 2
+  scale: number = 2,
+  options: ExportOptions = {}
 ): Promise<HTMLCanvasElement> {
+  const forceDesktop = !!options.forceDesktopView;
+  const desktopWidth = options.desktopWidth || 1280;
+
   // Method 1: html2canvas with sanitized styles
   try {
     const canvas = await html2canvas(target, {
@@ -95,8 +101,17 @@ async function captureElementToCanvas(
       allowTaint: true,
       backgroundColor: bgColor,
       logging: false,
+      windowWidth: forceDesktop ? desktopWidth : undefined,
       ignoreElements: (el) => el.classList.contains('no-export'),
       onclone: (clonedDoc, clonedTarget) => {
+        if (forceDesktop && clonedTarget) {
+          const el = clonedTarget as HTMLElement;
+          el.style.width = `${desktopWidth}px`;
+          el.style.minWidth = `${desktopWidth}px`;
+          el.style.maxWidth = `${desktopWidth}px`;
+          el.style.margin = '0 auto';
+        }
+
         // 1. Strip any URL links and interactive buttons
         clonedDoc.querySelectorAll('a').forEach((l) => l.removeAttribute('href'));
         clonedDoc.querySelectorAll('.no-export').forEach((el) => el.remove());
@@ -308,7 +323,7 @@ export async function exportElementToJpg(
     const isLight = options.theme === 'light' || document.documentElement.classList.contains('light');
     const bgColor = isLight ? '#ffffff' : '#0a111e';
 
-    const canvas = await captureElementToCanvas(target, bgColor, 2);
+    const canvas = await captureElementToCanvas(target, bgColor, 2, options);
 
     const blob: Blob = await new Promise((resolve, reject) => {
       canvas.toBlob(
@@ -354,7 +369,7 @@ export async function exportElementToPdf(
     const isLight = options.theme === 'light' || document.documentElement.classList.contains('light');
     const bgColor = isLight ? '#ffffff' : '#0a111e';
 
-    const canvas = await captureElementToCanvas(target, bgColor, 2);
+    const canvas = await captureElementToCanvas(target, bgColor, 2, options);
 
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
     const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';

@@ -12,6 +12,17 @@ export type UserRole =
   | 'AUDITOR'
   | 'VIEWER';
 
+export interface UserPermissions {
+  canViewDashboard: boolean;
+  canEditOffices: boolean;
+  canAddOffices: boolean;
+  canDeleteOffices: boolean;
+  canUploadOcr: boolean;
+  canModifyAttendance: boolean;
+  canExportReports: boolean;
+  canManageUsers: boolean;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -19,6 +30,7 @@ export interface UserProfile {
   role: UserRole;
   zone: string;
   assignedOfficeCode?: string; // If restricted to specific office
+  permissions?: UserPermissions;
 }
 
 export interface ContactDetail {
@@ -102,6 +114,105 @@ export interface Office {
   };
   leadershipHistory?: LeadershipTenureRecord[];
   staffBreakdown?: StaffBreakdown;
+
+  // Infrastructure & Administrative Details
+  buildingStatus?: 'Gratis' | 'Rented' | 'NADRA Owned' | string;
+  monthlyRentPKR?: number;
+  operationalDate?: string;
+  currentBuildingOperationalDate?: string;
+  shiftsCount?: number;
+  coveredAreaSqFt?: number;
+  buildingCondition?: 'Poor' | 'Satisfactory' | 'Good' | 'Excellent' | string;
+  loadSheddingHours?: number;
+  loadSheddingMinutes?: number;
+  generatorKVA?: string;
+  upsKVA?: string;
+  fleetCardStatus?: 'Available' | 'Not Available' | string;
+  fleetCardLastDigits?: string;
+  fleetCardReceiveDate?: string;
+  fleetCardUnavailableReason?: string;
+  publicFacilities?: string[];
+  parkingType?: string;
+
+  // Staff Table (Authorized vs Currently Held)
+  authorizedOfficers?: number;
+  heldOfficers?: number;
+  authorizedOfficials?: number;
+  heldOfficials?: number;
+  authorizedSupportive?: number;
+  heldSupportive?: number;
+  authorizedOutsource?: number;
+  heldOutsource?: number;
+
+  // Performance Analytics
+  dailyAvgTokens?: number;
+  peakTokens?: number;
+  peakTokensDate?: string;
+  lowestTokens?: number;
+  lowestTokensDate?: string;
+  latestTokens?: number;
+  avgTokensPerDEO?: number;
+  lastMonthTokensTotal?: number;
+  currentMonthTokensTotal?: number;
+  lastYearDailyAvgTokens?: number;
+}
+
+export interface PostingHistoryEntry {
+  id: string;
+  fromLocation: string;
+  toLocation: string;
+  startDate: string;
+  endDate: string;
+  transferOrderNo: string;
+  attachmentName?: string;
+  remarks?: string;
+}
+
+export interface EmployeeProfile {
+  id: string;
+  erpNumber: string;
+  name: string;
+  fatherName: string;
+  cnic: string;
+  designation: string;
+  department: string;
+  workingSeat: string;
+  dateOfAppointment: string;
+  dateOfPostingCurrentLocation: string;
+  photoUrl?: string;
+  passportStatus: 'Yes' | 'No';
+  passportNumber?: string;
+  passportIssuanceDate?: string;
+  passportExpiryDate?: string;
+  officialEmail?: string;
+  officialNumber?: string;
+  eOfficeUsername?: string;
+  neoUser?: string;
+  jobType: 'Permanent' | 'Contractual' | 'Deputation' | 'Daily Wages' | 'Outsource' | string;
+  grade: string;
+  contactNumber: string;
+  whatsappNumber: string;
+  permanentAddress: string;
+  currentAddress: string;
+  domicileDistrict: string;
+  domicileProvince: string;
+  dateOfBirth: string;
+  gender: 'Male' | 'Female';
+  religion: string;
+  sect: string;
+  maritalStatus: 'Single' | 'Married' | 'Widowed' | 'Divorced' | string;
+  disability: 'No' | 'Yes';
+  disabilityType?: string;
+  qualificationDegree: string;
+  qualificationYears: string;
+  postingHistory: PostingHistoryEntry[];
+  officeCode: string;
+  officeName: string;
+  punctualityScore?: number;
+  punctualityRank?: 'A+' | 'A' | 'B' | 'C';
+  totalLateCount?: number;
+  totalLeavesCount?: number;
+  isExcessiveLeaves?: boolean;
 }
 
 export interface EmployeeAttendanceRecord {
