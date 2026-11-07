@@ -870,7 +870,9 @@ export function setupStaticApiFallback() {
     // --- CLIENT-SIDE LOCALSTORAGE API FALLBACK ---
     const method = (init?.method || 'GET').toUpperCase();
     const parsedUrl = new URL(url, window.location.origin);
-    const pathname = parsedUrl.pathname;
+    const rawPath = parsedUrl.pathname;
+    const apiIndex = rawPath.indexOf('/api/');
+    const pathname = apiIndex >= 0 ? rawPath.substring(apiIndex) : rawPath;
     const db = getStoredDatabase();
 
     const makeJsonResponse = (data: any, status: number = 200) => {
