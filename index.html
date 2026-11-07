@@ -9,6 +9,13 @@
     <meta property="og:description" content="Enterprise operational reporting and statistics platform for NADRA Zone-D Larkana with automated OCR extraction, office-level reconciliation, Q-Matic and OneApp monitoring, and attendance tracking." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // Fallback: If GitHub Pages serves the unbuilt root index.html, redirect to pre-built /docs/
+      if (window.location.hostname.includes('github.io') && !document.querySelector('script[src*="assets/"]') && !window.location.pathname.includes('/docs')) {
+        var p = window.location.pathname.replace(/\/index\.html$/, '').replace(/\/$/, '');
+        window.location.replace(p + '/docs/' + window.location.search + window.location.hash);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
